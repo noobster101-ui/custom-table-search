@@ -1,0 +1,49 @@
+{
+  "name": "custom-table-search",
+  "version": "1.0.9",
+  "description": "A customizable, dynamic table component with advanced search, sorting, and pagination for React.",
+  "main": "dist/TableCustom.js",
+  "scripts": {
+    "build": "npx babel src --out-dir dist",
+    "postbuild": "cp src/TableCustom.css dist/TableCustom.css",
+    "prepare": "npm run build"
+  },
+  "keywords": [
+    "dynamic table",
+    "react table",
+    "pagination",
+    "sorting",
+    "search"
+  ],
+  "author": "Rakesh Singh",
+  "license": "MIT",
+  "dependencies": {
+    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fortawesome/free-solid-svg-icons": "^5.15.4",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "bootstrap": "^5.3.3",
+    "react-bootstrap": "^1.6.8"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.25.9",
+    "@babel/core": "^7.26.0",
+    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-react": "^7.25.9"
+  },
+  "files": [
+    "dist",
+    "src/TableCustom.css"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/noobster101-ui/custom-table-search"
+  },
+  "bugs": {
+    "url": "https://github.com/noobster101-ui/custom-table-search/issues"
+  },
+  "homepage": "https://github.com/noobster101-ui/custom-table-search#readme"
+}
