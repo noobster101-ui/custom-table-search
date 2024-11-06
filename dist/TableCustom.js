@@ -6,9 +6,6 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
-var _freeSolidSvgIcons = require("@fortawesome/free-solid-svg-icons");
-var _reactFontawesome = require("@fortawesome/react-fontawesome");
-require("bootstrap/dist/css/bootstrap.min.css");
 var _react = require("react");
 var _reactBootstrap = require("react-bootstrap");
 require("./TableCustom.css");
@@ -308,7 +305,12 @@ var TableCustom = function TableCustom(_ref) {
     }
     return pages;
   };
-  var paginatedData = paginationEnabled ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize) : data;
+  var displayedData = paginationEnabled && !fetchPage ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize) : data;
+  (0, _react.useEffect)(function () {
+    if (fetchPage) {
+      fetchPage(currentPage, pageSize);
+    }
+  }, [currentPage, pageSize]);
   return /*#__PURE__*/(0, _jsxRuntime.jsxs)(_jsxRuntime.Fragment, {
     children: [selectedSearchColumns.length > 0 && /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
       className: "card p-3 mb-1 customSearch",
@@ -369,18 +371,11 @@ var TableCustom = function TableCustom(_ref) {
                           onClick: function onClick() {
                             return handleAddCondition(key);
                           },
-                          style: {
-                            top: "0",
-                            height: "40px",
-                            width: "38px",
-                            bottom: "0",
-                            fontSize: "12px"
-                          },
                           title: "Add More ".concat((_columns$find3 = columns.find(function (col) {
                             return col.key === key;
                           })) === null || _columns$find3 === void 0 ? void 0 : _columns$find3.label),
-                          children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactFontawesome.FontAwesomeIcon, {
-                            icon: _freeSolidSvgIcons.faPlus
+                          children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                            children: "+"
                           })
                         })]
                       })
@@ -448,18 +443,11 @@ var TableCustom = function TableCustom(_ref) {
                             }
                           }), /*#__PURE__*/(0, _jsxRuntime.jsx)("button", {
                             className: "btn btn-dark",
-                            style: {
-                              top: "0",
-                              height: "41px",
-                              width: "38px",
-                              bottom: "0",
-                              fontSize: "12px"
-                            },
                             onClick: function onClick() {
                               return handleRemoveCondition(key, condIndex + 1);
                             },
-                            children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactFontawesome.FontAwesomeIcon, {
-                              icon: _freeSolidSvgIcons.faTimes
+                            children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                              children: "\u2715"
                             })
                           })]
                         })
@@ -548,8 +536,13 @@ var TableCustom = function TableCustom(_ref) {
           style: {
             height: "40px"
           },
-          children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactFontawesome.FontAwesomeIcon, {
-            icon: gridView ? _freeSolidSvgIcons.faTable : _freeSolidSvgIcons.faThLarge
+          children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+            children: gridView ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+              children: "\u2B1C"
+            }) // Symbol for grid view (⬛)
+            : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+              children: "\u2261"
+            }) // Symbol for table view (≡)
           })
         })]
       }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
@@ -582,12 +575,20 @@ var TableCustom = function TableCustom(_ref) {
                           e.stopPropagation();
                           handleSortColumnToggle(column.key);
                         },
-                        children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactFontawesome.FontAwesomeIcon, {
-                          icon: ((_sortConfig$find = sortConfig.find(function (config) {
+                        children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                          children: ((_sortConfig$find = sortConfig.find(function (config) {
                             return config.key === column.key;
-                          })) === null || _sortConfig$find === void 0 ? void 0 : _sortConfig$find.direction) === "asc" ? _freeSolidSvgIcons.faSortUp : ((_sortConfig$find2 = sortConfig.find(function (config) {
+                          })) === null || _sortConfig$find === void 0 ? void 0 : _sortConfig$find.direction) === "asc" ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                            children: "\u25B2"
+                          }) // Unicode for ▲ (up arrow for ascending sort)
+                          : ((_sortConfig$find2 = sortConfig.find(function (config) {
                             return config.key === column.key;
-                          })) === null || _sortConfig$find2 === void 0 ? void 0 : _sortConfig$find2.direction) === "desc" ? _freeSolidSvgIcons.faSortDown : _freeSolidSvgIcons.faSort // Default sort icon
+                          })) === null || _sortConfig$find2 === void 0 ? void 0 : _sortConfig$find2.direction) === "desc" ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                            children: "\u25BC"
+                          }) // Unicode for ▼ (down arrow for descending sort)
+                          : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                            children: "\u25B3\u25BD"
+                          }) // Unicode for △ and ▽ (neutral sort icons)
                         })
                       }), sortConfig.find(function (config) {
                         return config.key === column.key;
@@ -602,9 +603,7 @@ var TableCustom = function TableCustom(_ref) {
                           e.stopPropagation();
                           handleClearSort(column.key);
                         },
-                        children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactFontawesome.FontAwesomeIcon, {
-                          icon: _freeSolidSvgIcons.faTimes
-                        })
+                        children: "\u2715"
                       })]
                     }) : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {}), /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                       className: "px-2",
@@ -620,8 +619,13 @@ var TableCustom = function TableCustom(_ref) {
                         e.stopPropagation();
                         handleSearchColumnToggle(column.key);
                       },
-                      children: /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactFontawesome.FontAwesomeIcon, {
-                        icon: selectedSearchColumns.includes(column.key) ? _freeSolidSvgIcons.faTimes : _freeSolidSvgIcons.faSearch
+                      children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                        children: selectedSearchColumns.includes(column.key) ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                          children: "\u2715"
+                        }) // Cross icon
+                        : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                          children: "\uD83D\uDD0D"
+                        }) // Search icon
                       })
                     }) : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {})]
                   })
@@ -639,7 +643,7 @@ var TableCustom = function TableCustom(_ref) {
             })]
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)("tbody", {
             className: " ".concat(gridView ? "d-none" : ""),
-            children: paginatedData.map(function (row, rowIndex) {
+            children: displayedData.map(function (row, rowIndex) {
               return /*#__PURE__*/(0, _jsxRuntime.jsx)("tr", {
                 className: "text-center",
                 children: columns.map(function (column, colIndex) {
@@ -656,7 +660,7 @@ var TableCustom = function TableCustom(_ref) {
         })
       }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
         className: "cardView ".concat(!gridView ? "d-none" : ""),
-        children: paginatedData.map(function (row, rowIndex) {
+        children: displayedData.map(function (row, rowIndex) {
           return /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
             className: "card cardItem",
             children: /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {

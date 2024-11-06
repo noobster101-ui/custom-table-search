@@ -1,16 +1,4 @@
 "use client";
-import {
-  faPlus,
-  faSearch,
-  faSort,
-  faSortDown,
-  faSortUp,
-  faTable,
-  faThLarge,
-  faTimes,
-} from "@fortawesome/free-solid-svg-icons";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { useEffect, useState } from "react";
 import { Pagination } from "react-bootstrap";
 import "./TableCustom.css";
@@ -299,9 +287,16 @@ const TableCustom = ({
     return pages;
   };
 
-  const paginatedData = paginationEnabled
-    ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-    : data;
+  const displayedData =
+    paginationEnabled && !fetchPage
+      ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
+      : data;
+
+  useEffect(() => {
+    if (fetchPage) {
+      fetchPage(currentPage, pageSize);
+    }
+  }, [currentPage, pageSize]);
 
   return (
     <>
@@ -365,18 +360,11 @@ const TableCustom = ({
                             <button
                               className="btn btn-primary"
                               onClick={() => handleAddCondition(key)}
-                              style={{
-                                top: "0",
-                                height: "40px",
-                                width: "38px",
-                                bottom: "0",
-                                fontSize: "12px",
-                              }}
                               title={`Add More ${
                                 columns.find((col) => col.key === key)?.label
                               }`}
                             >
-                              <FontAwesomeIcon icon={faPlus} />
+                              <span>&#43;</span>
                             </button>
                           </div>
                         </div>
@@ -468,18 +456,11 @@ const TableCustom = ({
                               {/* Remove Condition Button */}
                               <button
                                 className="btn btn-dark"
-                                style={{
-                                  top: "0",
-                                  height: "41px",
-                                  width: "38px",
-                                  bottom: "0",
-                                  fontSize: "12px",
-                                }}
                                 onClick={() =>
                                   handleRemoveCondition(key, condIndex + 1)
                                 }
                               >
-                                <FontAwesomeIcon icon={faTimes} />
+                                <span>&#10005;</span>
                               </button>
                             </div>
                           </div>
@@ -562,7 +543,13 @@ const TableCustom = ({
               onClick={() => setGridView(!gridView)}
               style={{ height: "40px" }}
             >
-              <FontAwesomeIcon icon={gridView ? faTable : faThLarge} />
+              <span>
+                {gridView ? (
+                  <span>&#11036;</span> // Symbol for grid view (⬛)
+                ) : (
+                  <span>&#8801;</span> // Symbol for table view (≡)
+                )}
+              </span>
             </button>
           )}
         </div>
@@ -602,19 +589,19 @@ const TableCustom = ({
                               handleSortColumnToggle(column.key);
                             }}
                           >
-                            <FontAwesomeIcon
-                              icon={
-                                sortConfig.find(
+                            <span>
+                              {sortConfig.find(
+                                (config) => config.key === column.key
+                              )?.direction === "asc" ? (
+                                <span>&#9650;</span> // Unicode for ▲ (up arrow for ascending sort)
+                              ) : sortConfig.find(
                                   (config) => config.key === column.key
-                                )?.direction === "asc"
-                                  ? faSortUp
-                                  : sortConfig.find(
-                                      (config) => config.key === column.key
-                                    )?.direction === "desc"
-                                  ? faSortDown
-                                  : faSort // Default sort icon
-                              }
-                            />
+                                )?.direction === "desc" ? (
+                                <span>&#9660;</span> // Unicode for ▼ (down arrow for descending sort)
+                              ) : (
+                                <span>&#9651;&#9661;</span> // Unicode for △ and ▽ (neutral sort icons)
+                              )}
+                            </span>
                           </span>
 
                           {/* Conditionally Render Clear Sort Button */}
@@ -633,7 +620,7 @@ const TableCustom = ({
                                 handleClearSort(column.key);
                               }}
                             >
-                              <FontAwesomeIcon icon={faTimes} />
+                              &#10005;
                             </span>
                           )}
                         </div>
@@ -663,13 +650,13 @@ const TableCustom = ({
                             handleSearchColumnToggle(column.key);
                           }}
                         >
-                          <FontAwesomeIcon
-                            icon={
-                              selectedSearchColumns.includes(column.key)
-                                ? faTimes
-                                : faSearch
-                            }
-                          />
+                          <span>
+                            {selectedSearchColumns.includes(column.key) ? (
+                              <span>&#10005;</span> // Cross icon
+                            ) : (
+                              <span>&#128269;</span> // Search icon
+                            )}
+                          </span>
                         </span>
                       ) : (
                         <span></span>
@@ -693,7 +680,7 @@ const TableCustom = ({
               )}
             </thead>
             <tbody className={` ${gridView ? "d-none" : ""}`}>
-              {paginatedData.map((row, rowIndex) => (
+              {displayedData.map((row, rowIndex) => (
                 <tr key={rowIndex} className="text-center">
                   {columns.map((column, colIndex) => (
                     <td
@@ -710,7 +697,7 @@ const TableCustom = ({
         </div>
         {/* Card View */}
         <div className={`cardView ${!gridView ? "d-none" : ""}`}>
-          {paginatedData.map((row, rowIndex) => (
+          {displayedData.map((row, rowIndex) => (
             <div className="card cardItem" key={rowIndex}>
               <div className="card-body">
                 {/* Render grouped columns if they exist */}

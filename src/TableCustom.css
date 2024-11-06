@@ -16,6 +16,18 @@
 .customSearch .form-control::placeholder {
   font-size: 14px;
 }
+.customSearch .btn {
+  top: 0;
+  height: 40px;
+  padding: 5px;
+  width: 35px;
+  cursor: pointer;
+}
+.customSearch .btn span {
+  font-size: 20px;
+  padding: 0;
+  text-align: center;
+}
 .entries-dropdown .form-select,
 .customSearch .form-select {
   background-position: right 0.3rem center;
@@ -100,8 +112,8 @@
 
 /* Customize Bootstrap Pagination */
 .pagination .page-item.active .page-link {
-  background-color: #0d6efd;
-  border-color: #bbe9ff;
+  background-color: var(--bg-primary);
+  border-color: var(--bg-secondary);
   color: #fff;
   cursor: pointer;
 }

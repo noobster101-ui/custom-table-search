@@ -28,73 +28,47 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 
 ### Here’s an example of how to integrate custom-table-search in your React project:
 
-    import React, { useState, useEffect } from 'react';
-
-    import TableCustom from 'custom-table-search';
-    import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+    import React, { useState, useEffect } from "react";
+    import TableCustom from "custom-table-search";
 
     const MyTableComponent = () => {
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [totalRecords, setTotalRecords] = useState(0);
     const [pageSize, setPageSize] = useState(10);
+    const [totalRecords, setTotalRecords] = useState(0);
 
-    // Define columns with properties like searchability and sortability
     const columns = [
-    { key: "id", label: "ID", sortable: true, type: "number" },
-    { key: "name", label: "Name", searchable: true, sortable: true, type: "text" },
-    { key: "email", label: "Email", searchable: true, sortable: true, type: "email" },
-    { key: "status", label: "Status", searchable: true, sortable: true, type: "text" },
-    { key: "actions", label: "Actions", type: "none" },
+        { key: "id", label: "ID" },
+        { key: "name", label: "Name" },
+        { key: "email", label: "Email" },
+        { key: "status", label: "Status" },
     ];
 
-    // Define action buttons for each row
-    const dataWithActions = data.map((row) => ({
-    ...row,
-    actions: (
-        <div className="d-flex justify-content-center">
-            <button className="btn btn-primary btn-sm me-2" onClick={() => handleEdit(row)}>
-                <FontAwesomeIcon icon={["fas", "edit"]} />
-            </button>
-            <button className="btn btn-danger btn-sm me-2" onClick={() => handleDelete(row)}>
-                <FontAwesomeIcon icon={["fas", "trash"]} />
-            </button>
-            <button className="btn btn-info btn-sm" onClick={() => handleView(row)}>
-                <FontAwesomeIcon icon={["fas", "eye"]} />
-            </button>
-        </div>
-        ),
-    }));
-
-    useEffect(() => {
-    fetchData(currentPage, pageSize);
-    }, [currentPage, pageSize]);
-
-    // Fetch data function (to be replaced with actual data fetching logic)
-    const fetchData = (page, size, searchCriteria, sortConfig) => {
-    // Example: Fetch or filter data, then update states
-    console.log("Fetching data with:", { page, size, searchCriteria, sortConfig });
-    setData(sampleData); // Replace with real data fetching
-    setTotalRecords(sampleData.length); // Update based on real data
+    const fetchPage = (page, size) => {
+        const start = (page - 1) * size;
+        const paginatedData = fullData.slice(start, start + size);
+        setData(paginatedData);
+        setTotalRecords(fullData.length);
     };
 
-    const handleEdit = (row) => console.log("Edit:", row);
-    const handleDelete = (row) => console.log("Delete:", row);
-    const handleView = (row) => console.log("View:", row);
+    useEffect(() => {
+        fetchPage(currentPage, pageSize);
+    }, [currentPage, pageSize]);
 
     return (
             <TableCustom
-                data={dataWithActions}
-                columns={columns}
-                gridViewEnabled={true}
-                entriesEnabled={true}
-                paginationEnabled={true}
-                currentPage={currentPage}
-                setCurrentPage={setCurrentPage}
-                fetchPage={fetchData}
-                pageSize={pageSize}
-                setPageSize={setPageSize}
-                totalRecords={totalRecords}
+            data={data}
+            columns={columns}
+            gridViewEnabled={true}
+            searchEnabled={true}
+            entriesEnabled={true}
+            paginationEnabled={true}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            fetchPage={fetchPage}
+            pageSize={pageSize}
+            setPageSize={setPageSize}
+            totalRecords={totalRecords}
             />
         );
     };
