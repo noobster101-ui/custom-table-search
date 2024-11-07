@@ -94,7 +94,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 
     export default StaticDataPage;
 
-## Example 1: Static Data
+## Example 2: API Data
 
 ### This example uses local static data and showcases pagination, sorting, and action buttons.
 
