@@ -1,20 +1,29 @@
 {
   "name": "custom-table-search",
-  "version": "1.1.2",
+  "version": "2.0.0",
+  "homepage": "https://custom-table-sample.vercel.app/",
   "description": "A customizable, dynamic table component with advanced search, sorting, and pagination for React.",
   "main": "dist/TableCustom.js",
+  "keywords": [
+    "custom-table",
+    "table-search",
+    "react-table",
+    "data-table",
+    "pagination",
+    "sorting",
+    "filtering",
+    "grid-view",
+    "react-component",
+    "advanced-search",
+    "dynamic-table",
+    "frontend",
+    "UI-component"
+  ],
   "scripts": {
     "build": "npx babel src --out-dir dist",
     "postbuild": "cp src/TableCustom.css dist/TableCustom.css",
     "prepare": "npm run build"
   },
-  "keywords": [
-    "dynamic table",
-    "react table",
-    "pagination",
-    "sorting",
-    "search"
-  ],
   "author": "Rakesh Singh",
   "license": "MIT",
   "peerDependencies": {
@@ -39,6 +48,5 @@
   },
   "bugs": {
     "url": "https://github.com/noobster101-ui/custom-table-search/issues"
-  },
-  "homepage": "https://github.com/noobster101-ui/custom-table-search#readme"
+  }
 }
