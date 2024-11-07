@@ -1,6 +1,6 @@
 {
   "name": "custom-table-search",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A customizable, dynamic table component with advanced search, sorting, and pagination for React.",
   "main": "dist/TableCustom.js",
   "scripts": {
