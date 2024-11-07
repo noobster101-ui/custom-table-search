@@ -2,6 +2,19 @@
 .responsive-table-component {
   margin-bottom: 20px;
 }
+.bgColor {
+  background-color: var(
+    --back-color,
+    #007bff
+  ) !important; /* Default to white if not set */
+}
+
+.txtColor {
+  color: var(
+    --txt-color,
+    #fff
+  ) !important; /* Default to dark gray if not set */
+}
 
 /* Toolbar Styling */
 .toolbar {
@@ -9,7 +22,7 @@
   padding: 10px;
   border-radius: 5px;
   box-shadow: 0px 1px 3px rgba(0, 0, 0, 0.1);
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
 }
 
 .customSearch .form-control,
@@ -27,6 +40,7 @@
   font-size: 20px;
   padding: 0;
   text-align: center;
+  line-height: 1;
 }
 .entries-dropdown .form-select,
 .customSearch .form-select {
@@ -55,7 +69,7 @@
 .responsive-table-component .responsiveTable th,
 .responsive-table-component .responsiveTable td {
   padding: 8px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
 }
 
@@ -79,7 +93,7 @@
 }
 
 .responsive-table-component .cardItem {
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   background-color: #fff;
   transition: all 0.3s ease-in-out;
 }
@@ -87,11 +101,10 @@
 .responsive-table-component .cardItem:hover {
   background-color: #fff;
 }
-
 .cardItem .card-text {
   display: flex;
   justify-content: space-between;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   padding: 8px;
   margin: -1px;
   color: #2a0f0d;
@@ -112,9 +125,9 @@
 
 /* Customize Bootstrap Pagination */
 .pagination .page-item.active .page-link {
-  background-color: var(--bg-primary);
-  border-color: var(--bg-secondary);
-  color: #fff;
+  background-color: var(--back-color, #007bff);
+  border-color: var(--border-color, #ddd);
+  color: var(--txt-color, #fff);
   cursor: pointer;
 }
 

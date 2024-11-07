@@ -24,31 +24,42 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 
     npm install custom-table-search
 
-## Usage
+## Example 1: Static Data
 
-### Here’s an example of how to integrate custom-table-search in your React project:
+### This example uses local static data and showcases pagination, sorting, and action buttons.
 
     import React, { useState, useEffect } from "react";
     import TableCustom from "custom-table-search";
+    import "bootstrap/dist/css/bootstrap.min.css";
 
-    const MyTableComponent = () => {
-    const [data, setData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(10);
-    const [totalRecords, setTotalRecords] = useState(0);
-
-    const columns = [
-        { key: "id", label: "ID" },
-        { key: "name", label: "Name" },
-        { key: "email", label: "Email" },
-        { key: "status", label: "Status" },
+    const sampleData = [
+    { id: 1, name: "John Doe", email: "john@example.com", status: "Active" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", status: "Inactive" },
+    { id: 3, name: "Alice Johnson", email: "alice@example.com", status: "Active" },
+    // Add more data as needed
     ];
 
+    const StaticDataPage = () => {
+    const [data, setData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5); // Define setPageSize here
+    const [totalRecords, setTotalRecords] = useState(sampleData.length);
+    const customEntriesOptions = [5, 10, 20, 50];
+    const customDefaultPageSize = 10;
+
+    const columns = [
+        { key: "id", label: "ID", sortable: true },
+        { key: "name", label: "Name", sortable: true, searchable: true },
+        { key: "email", label: "Email", sortable: true, searchable: true },
+        { key: "status", label: "Status", sortable: true, searchable: true },
+    ];
+
+    // Pagination function
     const fetchPage = (page, size) => {
-        const start = (page - 1) * size;
-        const paginatedData = fullData.slice(start, start + size);
-        setData(paginatedData);
-        setTotalRecords(fullData.length);
+        setCurrentPage(page);
+        setPageSize(size);
+        const startIdx = (page - 1) * size;
+        setData(sampleData.slice(startIdx, startIdx + size));
     };
 
     useEffect(() => {
@@ -56,55 +67,141 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
     }, [currentPage, pageSize]);
 
     return (
-            <TableCustom
-            data={data}
-            columns={columns}
-            gridViewEnabled={true}
-            searchEnabled={true}
-            entriesEnabled={true}
-            paginationEnabled={true}
-            currentPage={currentPage}
-            setCurrentPage={setCurrentPage}
-            fetchPage={fetchPage}
-            pageSize={pageSize}
-            setPageSize={setPageSize}
-            totalRecords={totalRecords}
-            />
+            <div className="container mt-5">
+                <h2>Static Data Table</h2>
+                <TableCustom
+                    data={data}
+                    columns={columns}
+                    gridViewEnabled={true}
+                    entriesEnabled={true}
+                    paginationEnabled={true}
+                    searchEnabled={true}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchPage={fetchPage}
+                    pageSize={pageSize}
+                    setPageSize={setPageSize} // Pass setPageSize here
+                    totalRecords={totalRecords}
+                    entriesOptions={customEntriesOptions}
+                    defaultPageSize={customDefaultPageSize}
+                    bgColor="#111"
+                    txtColor="#fff"
+                    borderColor="#ddd"
+                />
+            </div>
         );
     };
 
-    export default MyTableComponent;
+    export default StaticDataPage;
+
+## Example 1: Static Data
+
+### This example uses local static data and showcases pagination, sorting, and action buttons.
+
+    import React, { useState, useEffect } from "react";
+    import TableCustom from "custom-table-search";
+    import "bootstrap/dist/css/bootstrap.min.css";
+
+    const sampleData = [
+    { id: 1, name: "John Doe", email: "john@example.com", status: "Active" },
+    { id: 2, name: "Jane Smith", email: "jane@example.com", status: "Inactive" },
+    { id: 3, name: "Alice Johnson", email: "alice@example.com", status: "Active" },
+    // Add more data as needed
+    ];
+
+    const ApiDataPage = () => {
+    const [data, setData] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [pageSize, setPageSize] = useState(12);
+    const [totalRecords, setTotalRecords] = useState(sampleData.length);
+    // const customEntriesOptions = [5, 10, 20, 50];
+    // const customDefaultPageSize = 10;
+
+    const columns = [
+        { key: "id", label: "ID", sortable: true },
+        { key: "name", label: "Name", sortable: true, searchable: true },
+        { key: "email", label: "Email", sortable: true, searchable: true },
+        { key: "status", label: "Status", sortable: true, searchable: true },
+    ];
+
+    // Function to fetch page data (simulating an API call)
+    const fetchPage = async (page, size) => {
+        setCurrentPage(page);
+        setPageSize(size);
+        const startIdx = (page - 1) * size;
+        const pagedData = sampleData.slice(startIdx, startIdx + size); // Simulate API data slice
+        setData(pagedData);
+        setTotalRecords(sampleData.length); // Set the total record count based on data length
+    };
+
+    useEffect(() => {
+        fetchPage(currentPage, pageSize);
+    }, [currentPage, pageSize]);
+
+    return (
+            <div className="container mt-5">
+                <h2>API Data Table</h2>
+                <TableCustom
+                    data={data}
+                    columns={columns}
+                    paginationEnabled={true}
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                    fetchPage={fetchPage} // Pass fetchPage to handle pagination
+                    pageSize={pageSize} // Current page size
+                    setPageSize={setPageSize} // Function to change page size
+                    totalRecords={totalRecords}
+                    // entriesOptions={customEntriesOptions}
+                    // defaultPageSize={customDefaultPageSize}
+                />
+            </div>
+        );
+    };
+
+    export default ApiDataPage;
+
+### Example Explanation
+
+    - StaticDataTable:
+        - Uses a local array (sampleData) and paginates by slicing the array based on currentPage and pageSize.
+        - Action buttons for each row to demonstrate how custom buttons work within the table.
+    - ApiDataTable:
+        - Fetches data from a mock API with pagination and page size passed as parameters.
+        - Action buttons are also included here, demonstrating row-specific interactions with API-based data.
 
 ## Props
 
 ### Core Props
 
-| Prop              | Type     | Description                                                                            |
-| ----------------- | -------- | -------------------------------------------------------------------------------------- |
-| data              | Array    | Array of data objects for each row.                                                    |
-| columns           | Array    | Column configuration with options like label, searchability, and sortability.          |
-| gridViewEnabled   | Boolean  | Enables toggle between grid and table view.                                            |
-| entriesEnabled    | Boolean  | Enables page size dropdown to control entries per page.                                |
-| paginationEnabled | Boolean  | Enables pagination controls for navigating pages.                                      |
-| currentPage       | Number   | Current page number for pagination.                                                    |
-| setCurrentPage    | Function | Function to update the current page.                                                   |
-| fetchPage         | Function | Function to fetch data for the specified page and size, taking search/sort parameters. |
-| pageSize          | Number   | Number of records per page.                                                            |
-| setPageSize       | Function | Function to set the number of records per page.                                        |
-| totalRecords      | Number   | Total number of records for accurate pagination.                                       |
+| Prop                | Type       | Default   | Description                                                                            |
+| ------------------- | ---------- | --------- | -------------------------------------------------------------------------------------- |
+| `data`              | `Array`    | `[]`      | Array of data objects for each row.                                                    |
+| `columns`           | `Array`    | `[]`      | Column configuration with options like label, searchability, and sortability.          |
+| `gridViewEnabled`   | `Boolean`  | `true`    | Enables toggle between grid and table view.                                            |
+| `entriesEnabled`    | `Boolean`  | `true`    | Enables page size dropdown to control entries per page.                                |
+| `paginationEnabled` | `Boolean`  | `true`    | Enables pagination controls for navigating pages.                                      |
+| `searchEnabled`     | `Boolean`  | `true`    | Enables column-specific search functionality.                                          |
+| `currentPage`       | `Number`   | `1`       | Current page number for pagination.                                                    |
+| `setCurrentPage`    | `Function` | Required  | Function to update the current page.                                                   |
+| `fetchPage`         | `Function` | Required  | Function to fetch data for the specified page and size, taking search/sort parameters. |
+| `pageSize`          | `Number`   | `12`      | Number of records per page.                                                            |
+| `setPageSize`       | `Function` | Required  | Function to set the number of records per page.                                        |
+| `totalRecords`      | `Number`   | `0`       | Total number of records for accurate pagination.                                       |
+| `bgColor`           | `String`   | `#f8f9fa` | Background color for the table.                                                        |
+| `txtColor`          | `String`   | `#333333` | Text color for the table.                                                              |
 
 ### Column Configuration
 
 Each column object in the columns array can have the following properties:
 
-| Column Property | Type    | Description                                           |
-| --------------- | ------- | ----------------------------------------------------- |
-| key             | String  | Unique identifier for the column.                     |
-| label           | String  | Display name for the column header.                   |
-| sortable        | Boolean | Allows sorting when true.                             |
-| searchable      | Boolean | Enables search/filtering for this column.             |
-| textAlign       | String  | Aligns text within the column (e.g., "center").       |
-| type            | String  | Input type for search fields (e.g., "text", "email"). |
+| Column Property | Type      | Default  | Description                                               |
+| --------------- | --------- | -------- | --------------------------------------------------------- |
+| `key`           | `String`  | Required | Unique identifier for the column.                         |
+| `label`         | `String`  | `""`     | Display name for the column header.                       |
+| `sortable`      | `Boolean` | `false`  | Allows sorting when `true`.                               |
+| `searchable`    | `Boolean` | `false`  | Enables search/filtering for this column.                 |
+| `textAlign`     | `String`  | `"left"` | Aligns text within the column (e.g., `"center"`).         |
+| `type`          | `String`  | `"text"` | Input type for search fields (e.g., `"text"`, `"email"`). |
 
 ## Object Creted on Search and Filter
 

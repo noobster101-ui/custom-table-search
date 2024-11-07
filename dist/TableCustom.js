@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", {
   value: true
 });
 exports["default"] = void 0;
+exports.setRootThemeColors = setRootThemeColors;
 var _react = require("react");
 var _reactBootstrap = require("react-bootstrap");
 require("./TableCustom.css");
@@ -25,6 +26,11 @@ function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) 
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function setRootThemeColors(bgColor, txtColor, borderColor) {
+  document.documentElement.style.setProperty("--back-color", bgColor);
+  document.documentElement.style.setProperty("--txt-color", txtColor);
+  document.documentElement.style.setProperty("--border-color", borderColor);
+}
 var TableCustom = function TableCustom(_ref) {
   var data = _ref.data,
     columns = _ref.columns,
@@ -36,12 +42,28 @@ var TableCustom = function TableCustom(_ref) {
     entriesEnabled = _ref$entriesEnabled === void 0 ? true : _ref$entriesEnabled,
     _ref$paginationEnable = _ref.paginationEnabled,
     paginationEnabled = _ref$paginationEnable === void 0 ? true : _ref$paginationEnable,
-    currentPage = _ref.currentPage,
+    _ref$currentPage = _ref.currentPage,
+    currentPage = _ref$currentPage === void 0 ? 1 : _ref$currentPage,
     setCurrentPage = _ref.setCurrentPage,
     fetchPage = _ref.fetchPage,
-    pageSize = _ref.pageSize,
+    _ref$pageSize = _ref.pageSize,
+    pageSize = _ref$pageSize === void 0 ? 12 : _ref$pageSize,
     setPageSize = _ref.setPageSize,
-    totalRecords = _ref.totalRecords;
+    totalRecords = _ref.totalRecords,
+    _ref$entriesOptions = _ref.entriesOptions,
+    entriesOptions = _ref$entriesOptions === void 0 ? [12, 24, 48, 108] : _ref$entriesOptions,
+    _ref$defaultPageSize = _ref.defaultPageSize,
+    defaultPageSize = _ref$defaultPageSize === void 0 ? 12 : _ref$defaultPageSize,
+    _ref$bgColor = _ref.bgColor,
+    bgColor = _ref$bgColor === void 0 ? "#0d6efd" : _ref$bgColor,
+    _ref$txtColor = _ref.txtColor,
+    txtColor = _ref$txtColor === void 0 ? "#fff" : _ref$txtColor,
+    _ref$borderColor = _ref.borderColor,
+    borderColor = _ref$borderColor === void 0 ? "#ddd" : _ref$borderColor;
+  (0, _react.useEffect)(function () {
+    // Set theme colors based on props
+    setRootThemeColors(bgColor, txtColor, borderColor);
+  }, [bgColor, txtColor, borderColor]);
   var _useState = (0, _react.useState)(false),
     _useState2 = _slicedToArray(_useState, 2),
     gridView = _useState2[0],
@@ -75,6 +97,18 @@ var TableCustom = function TableCustom(_ref) {
   }, [searchValues, isConditionRemoved]);
   var sqlOperations = ["AND", "OR"];
   var sqlOperations2 = ["LIKE", "EQUAL", "CONTAINS", "STARTWITH", "ENDWITH", "ISNULL", "ISNOTNULL"];
+
+  // Set default page size if specified
+  (0, _react.useEffect)(function () {
+    setPageSize(defaultPageSize);
+  }, [defaultPageSize, setPageSize]);
+  var handlePageSizeChange = function handlePageSizeChange(e) {
+    var newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to page 1
+    var searchCriteria = getSearchCriteria(); // Customize search criteria if needed
+    fetchPage(1, newSize, searchCriteria, sortConfig);
+  };
 
   // Calculate total pages based on totalRecords and pageSize
   var totalPages = Math.ceil(totalRecords / pageSize);
@@ -305,12 +339,6 @@ var TableCustom = function TableCustom(_ref) {
     }
     return pages;
   };
-  var displayedData = paginationEnabled && !fetchPage ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize) : data;
-  (0, _react.useEffect)(function () {
-    if (fetchPage) {
-      fetchPage(currentPage, pageSize);
-    }
-  }, [currentPage, pageSize]);
   return /*#__PURE__*/(0, _jsxRuntime.jsxs)(_jsxRuntime.Fragment, {
     children: [selectedSearchColumns.length > 0 && /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
       className: "card p-3 mb-1 customSearch",
@@ -367,7 +395,7 @@ var TableCustom = function TableCustom(_ref) {
                             return handleSearchValueChange(key, 0, "value", e.target.value);
                           }
                         }), /*#__PURE__*/(0, _jsxRuntime.jsx)("button", {
-                          className: "btn btn-primary",
+                          className: "btn bgColor txtColor",
                           onClick: function onClick() {
                             return handleAddCondition(key);
                           },
@@ -482,7 +510,7 @@ var TableCustom = function TableCustom(_ref) {
           children: /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
             className: "card p-2",
             children: /*#__PURE__*/(0, _jsxRuntime.jsx)("button", {
-              className: "btn btn-primary w-100",
+              className: "btn bgColor txtColor w-100",
               onClick: handleSearchAndSortSubmit,
               style: {
                 top: "0",
@@ -503,33 +531,20 @@ var TableCustom = function TableCustom(_ref) {
             htmlFor: "pageSize",
             className: "me-1",
             children: "Show:"
-          }), /*#__PURE__*/(0, _jsxRuntime.jsxs)("select", {
+          }), /*#__PURE__*/(0, _jsxRuntime.jsx)("select", {
             id: "pageSize",
             className: "form-select d-inline-block w-auto",
             value: pageSize,
-            onChange: function onChange(e) {
-              var newSize = Number(e.target.value);
-              setPageSize(newSize);
-              setCurrentPage(1);
-              searchCriteria = getSearchCriteria();
-              fetchPage(1, newSize, searchCriteria, sortConfig);
-            },
-            children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("option", {
-              value: "10",
-              children: "10"
-            }), /*#__PURE__*/(0, _jsxRuntime.jsx)("option", {
-              value: "20",
-              children: "20"
-            }), /*#__PURE__*/(0, _jsxRuntime.jsx)("option", {
-              value: "50",
-              children: "50"
-            }), /*#__PURE__*/(0, _jsxRuntime.jsx)("option", {
-              value: "100",
-              children: "100"
-            })]
+            onChange: handlePageSizeChange,
+            children: entriesOptions.map(function (option) {
+              return /*#__PURE__*/(0, _jsxRuntime.jsx)("option", {
+                value: option,
+                children: option
+              }, option);
+            })
           })]
         }), gridViewEnabled && /*#__PURE__*/(0, _jsxRuntime.jsx)("button", {
-          className: "btn btn-primary toggle-button",
+          className: "btn bgColor txtColor toggle-button",
           onClick: function onClick() {
             return setGridView(!gridView);
           },
@@ -557,7 +572,7 @@ var TableCustom = function TableCustom(_ref) {
                   style: {
                     textAlign: column.textAlign || "left"
                   },
-                  className: "bg-primary",
+                  className: "bgColor txtColor",
                   children: /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
                     className: "d-flex justify-content-between align-items-center ",
                     children: [column.sortable ? /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
@@ -642,8 +657,8 @@ var TableCustom = function TableCustom(_ref) {
               })
             })]
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)("tbody", {
-            className: " ".concat(gridView ? "d-none" : ""),
-            children: displayedData.map(function (row, rowIndex) {
+            className: " ".concat(gridView ? "dHide" : ""),
+            children: data.map(function (row, rowIndex) {
               return /*#__PURE__*/(0, _jsxRuntime.jsx)("tr", {
                 className: "text-center",
                 children: columns.map(function (column, colIndex) {
@@ -659,8 +674,8 @@ var TableCustom = function TableCustom(_ref) {
           })]
         })
       }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
-        className: "cardView ".concat(!gridView ? "d-none" : ""),
-        children: displayedData.map(function (row, rowIndex) {
+        className: "cardView ".concat(!gridView ? "dHide" : ""),
+        children: data.map(function (row, rowIndex) {
           return /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
             className: "card cardItem",
             children: /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
@@ -687,7 +702,7 @@ var TableCustom = function TableCustom(_ref) {
           }, rowIndex);
         })
       }), paginationEnabled && /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
-        className: "d-flex justify-content-between align-items-center mt-3 pagination-container bg-primary",
+        className: "d-flex justify-content-between align-items-center mt-3 pagination-container bgColor txtColor",
         children: [/*#__PURE__*/(0, _jsxRuntime.jsxs)("span", {
           className: "pagination-info",
           children: ["Showing ", srno, " to ", Math.min(srno - 1 + pageSize, totalRecords), " of", " ", totalRecords, " entries"]

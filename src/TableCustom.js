@@ -3,6 +3,12 @@ import { useEffect, useState } from "react";
 import { Pagination } from "react-bootstrap";
 import "./TableCustom.css";
 
+export function setRootThemeColors(bgColor, txtColor, borderColor) {
+  document.documentElement.style.setProperty("--back-color", bgColor);
+  document.documentElement.style.setProperty("--txt-color", txtColor);
+  document.documentElement.style.setProperty("--border-color", borderColor);
+}
+
 const TableCustom = ({
   data,
   columns,
@@ -10,13 +16,23 @@ const TableCustom = ({
   gridViewEnabled = true,
   entriesEnabled = true,
   paginationEnabled = true,
-  currentPage,
+  currentPage = 1,
   setCurrentPage,
   fetchPage,
-  pageSize,
+  pageSize = 12,
   setPageSize,
   totalRecords,
+  entriesOptions = [12, 24, 48, 108],
+  defaultPageSize = 12,
+  bgColor = "#0d6efd",
+  txtColor = "#fff",
+  borderColor = "#ddd",
 }) => {
+  useEffect(() => {
+    // Set theme colors based on props
+    setRootThemeColors(bgColor, txtColor, borderColor);
+  }, [bgColor, txtColor, borderColor]);
+
   const [gridView, setGridView] = useState(false);
   const [searchValues, setSearchValues] = useState({}); // Object to store search values per column
   const [sortConfig, setSortConfig] = useState([]); // Array to store sort columns and directions
@@ -42,6 +58,19 @@ const TableCustom = ({
     "ISNULL",
     "ISNOTNULL",
   ];
+
+  // Set default page size if specified
+  useEffect(() => {
+    setPageSize(defaultPageSize);
+  }, [defaultPageSize, setPageSize]);
+
+  const handlePageSizeChange = (e) => {
+    const newSize = Number(e.target.value);
+    setPageSize(newSize);
+    setCurrentPage(1); // Reset to page 1
+    const searchCriteria = getSearchCriteria(); // Customize search criteria if needed
+    fetchPage(1, newSize, searchCriteria, sortConfig);
+  };
 
   // Calculate total pages based on totalRecords and pageSize
   const totalPages = Math.ceil(totalRecords / pageSize);
@@ -287,17 +316,6 @@ const TableCustom = ({
     return pages;
   };
 
-  const displayedData =
-    paginationEnabled && !fetchPage
-      ? data.slice((currentPage - 1) * pageSize, currentPage * pageSize)
-      : data;
-
-  useEffect(() => {
-    if (fetchPage) {
-      fetchPage(currentPage, pageSize);
-    }
-  }, [currentPage, pageSize]);
-
   return (
     <>
       {/* Search Inputs with Add Condition Button */}
@@ -358,7 +376,7 @@ const TableCustom = ({
                               }
                             />
                             <button
-                              className="btn btn-primary"
+                              className="btn bgColor txtColor"
                               onClick={() => handleAddCondition(key)}
                               title={`Add More ${
                                 columns.find((col) => col.key === key)?.label
@@ -496,7 +514,7 @@ const TableCustom = ({
               {/* Search Button */}
               <div className="card p-2">
                 <button
-                  className="btn btn-primary w-100"
+                  className="btn bgColor txtColor w-100"
                   onClick={handleSearchAndSortSubmit}
                   style={{ top: "0", height: "40px" }}
                 >
@@ -521,25 +539,20 @@ const TableCustom = ({
                 id="pageSize"
                 className="form-select d-inline-block w-auto"
                 value={pageSize}
-                onChange={(e) => {
-                  const newSize = Number(e.target.value);
-                  setPageSize(newSize);
-                  setCurrentPage(1);
-                  searchCriteria = getSearchCriteria();
-                  fetchPage(1, newSize, searchCriteria, sortConfig);
-                }}
+                onChange={handlePageSizeChange}
               >
-                <option value="10">10</option>
-                <option value="20">20</option>
-                <option value="50">50</option>
-                <option value="100">100</option>
+                {entriesOptions.map((option) => (
+                  <option key={option} value={option}>
+                    {option}
+                  </option>
+                ))}
               </select>
             </div>
           )}
 
           {gridViewEnabled && (
             <button
-              className="btn btn-primary toggle-button"
+              className="btn bgColor txtColor toggle-button"
               onClick={() => setGridView(!gridView)}
               style={{ height: "40px" }}
             >
@@ -563,7 +576,7 @@ const TableCustom = ({
                   <th
                     key={index}
                     style={{ textAlign: column.textAlign || "left" }}
-                    className="bg-primary"
+                    className="bgColor txtColor"
                   >
                     <div className="d-flex justify-content-between align-items-center ">
                       {/* Sort Icon */}
@@ -679,8 +692,8 @@ const TableCustom = ({
                 </tr>
               )}
             </thead>
-            <tbody className={` ${gridView ? "d-none" : ""}`}>
-              {displayedData.map((row, rowIndex) => (
+            <tbody className={` ${gridView ? "dHide" : ""}`}>
+              {data.map((row, rowIndex) => (
                 <tr key={rowIndex} className="text-center">
                   {columns.map((column, colIndex) => (
                     <td
@@ -696,8 +709,8 @@ const TableCustom = ({
           </table>
         </div>
         {/* Card View */}
-        <div className={`cardView ${!gridView ? "d-none" : ""}`}>
-          {displayedData.map((row, rowIndex) => (
+        <div className={`cardView ${!gridView ? "dHide" : ""}`}>
+          {data.map((row, rowIndex) => (
             <div className="card cardItem" key={rowIndex}>
               <div className="card-body">
                 {/* Render grouped columns if they exist */}
@@ -734,7 +747,9 @@ const TableCustom = ({
 
         {/* Pagination */}
         {paginationEnabled && (
-          <div className="d-flex justify-content-between align-items-center mt-3 pagination-container bg-primary">
+          <div
+            className={`d-flex justify-content-between align-items-center mt-3 pagination-container bgColor txtColor`}
+          >
             <span className="pagination-info">
               Showing {srno} to {Math.min(srno - 1 + pageSize, totalRecords)} of{" "}
               {totalRecords} entries
