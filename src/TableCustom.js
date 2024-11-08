@@ -600,6 +600,12 @@ const TableCustom = ({
                             onClick={(e) => {
                               e.stopPropagation();
                               handleSortColumnToggle(column.key);
+                              fetchPage(
+                                1,
+                                pageSize,
+                                searchCriteria,
+                                sortConfig
+                              );
                             }}
                           >
                             <span>

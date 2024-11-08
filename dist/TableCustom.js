@@ -589,6 +589,7 @@ var TableCustom = function TableCustom(_ref) {
                         onClick: function onClick(e) {
                           e.stopPropagation();
                           handleSortColumnToggle(column.key);
+                          fetchPage(1, pageSize, searchCriteria, sortConfig);
                         },
                         children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                           children: ((_sortConfig$find = sortConfig.find(function (config) {
