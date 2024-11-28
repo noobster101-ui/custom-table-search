@@ -1,7 +1,6 @@
 "use strict";
 "use client";
 
-function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 Object.defineProperty(exports, "__esModule", {
   value: true
 });
@@ -11,55 +10,69 @@ var _react = require("react");
 var _reactBootstrap = require("react-bootstrap");
 require("./TableCustom.css");
 var _jsxRuntime = require("react/jsx-runtime");
+function _typeof(o) { "@babel/helpers - typeof"; return _typeof = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (o) { return typeof o; } : function (o) { return o && "function" == typeof Symbol && o.constructor === Symbol && o !== Symbol.prototype ? "symbol" : typeof o; }, _typeof(o); }
 function _toConsumableArray(r) { return _arrayWithoutHoles(r) || _iterableToArray(r) || _unsupportedIterableToArray(r) || _nonIterableSpread(); }
 function _nonIterableSpread() { throw new TypeError("Invalid attempt to spread non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _iterableToArray(r) { if ("undefined" != typeof Symbol && null != r[Symbol.iterator] || null != r["@@iterator"]) return Array.from(r); }
 function _arrayWithoutHoles(r) { if (Array.isArray(r)) return _arrayLikeToArray(r); }
-function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
-function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
-function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
-function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function _slicedToArray(r, e) { return _arrayWithHoles(r) || _iterableToArrayLimit(r, e) || _unsupportedIterableToArray(r, e) || _nonIterableRest(); }
 function _nonIterableRest() { throw new TypeError("Invalid attempt to destructure non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method."); }
 function _unsupportedIterableToArray(r, a) { if (r) { if ("string" == typeof r) return _arrayLikeToArray(r, a); var t = {}.toString.call(r).slice(8, -1); return "Object" === t && r.constructor && (t = r.constructor.name), "Map" === t || "Set" === t ? Array.from(r) : "Arguments" === t || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(t) ? _arrayLikeToArray(r, a) : void 0; } }
 function _arrayLikeToArray(r, a) { (null == a || a > r.length) && (a = r.length); for (var e = 0, n = Array(a); e < a; e++) n[e] = r[e]; return n; }
 function _iterableToArrayLimit(r, l) { var t = null == r ? null : "undefined" != typeof Symbol && r[Symbol.iterator] || r["@@iterator"]; if (null != t) { var e, n, i, u, a = [], f = !0, o = !1; try { if (i = (t = t.call(r)).next, 0 === l) { if (Object(t) !== t) return; f = !1; } else for (; !(f = (e = i.call(t)).done) && (a.push(e.value), a.length !== l); f = !0); } catch (r) { o = !0, n = r; } finally { try { if (!f && null != t["return"] && (u = t["return"](), Object(u) !== u)) return; } finally { if (o) throw n; } } return a; } }
 function _arrayWithHoles(r) { if (Array.isArray(r)) return r; }
+function ownKeys(e, r) { var t = Object.keys(e); if (Object.getOwnPropertySymbols) { var o = Object.getOwnPropertySymbols(e); r && (o = o.filter(function (r) { return Object.getOwnPropertyDescriptor(e, r).enumerable; })), t.push.apply(t, o); } return t; }
+function _objectSpread(e) { for (var r = 1; r < arguments.length; r++) { var t = null != arguments[r] ? arguments[r] : {}; r % 2 ? ownKeys(Object(t), !0).forEach(function (r) { _defineProperty(e, r, t[r]); }) : Object.getOwnPropertyDescriptors ? Object.defineProperties(e, Object.getOwnPropertyDescriptors(t)) : ownKeys(Object(t)).forEach(function (r) { Object.defineProperty(e, r, Object.getOwnPropertyDescriptor(t, r)); }); } return e; }
+function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == _typeof(i) ? i : i + ""; }
+function _toPrimitive(t, r) { if ("object" != _typeof(t) || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != _typeof(i)) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
 function setRootThemeColors(bgColor, txtColor, borderColor) {
   document.documentElement.style.setProperty("--back-color", bgColor);
   document.documentElement.style.setProperty("--txt-color", txtColor);
   document.documentElement.style.setProperty("--border-color", borderColor);
 }
-var TableCustom = function TableCustom(_ref) {
-  var data = _ref.data,
-    columns = _ref.columns,
-    _ref$groupedColumns = _ref.groupedColumns,
-    groupedColumns = _ref$groupedColumns === void 0 ? [] : _ref$groupedColumns,
-    _ref$gridViewEnabled = _ref.gridViewEnabled,
-    gridViewEnabled = _ref$gridViewEnabled === void 0 ? true : _ref$gridViewEnabled,
-    _ref$entriesEnabled = _ref.entriesEnabled,
-    entriesEnabled = _ref$entriesEnabled === void 0 ? true : _ref$entriesEnabled,
-    _ref$paginationEnable = _ref.paginationEnabled,
-    paginationEnabled = _ref$paginationEnable === void 0 ? true : _ref$paginationEnable,
-    _ref$currentPage = _ref.currentPage,
-    currentPage = _ref$currentPage === void 0 ? 1 : _ref$currentPage,
-    setCurrentPage = _ref.setCurrentPage,
-    fetchPage = _ref.fetchPage,
-    _ref$pageSize = _ref.pageSize,
-    pageSize = _ref$pageSize === void 0 ? 12 : _ref$pageSize,
-    setPageSize = _ref.setPageSize,
-    totalRecords = _ref.totalRecords,
-    _ref$entriesOptions = _ref.entriesOptions,
-    entriesOptions = _ref$entriesOptions === void 0 ? [12, 24, 48, 108] : _ref$entriesOptions,
-    _ref$defaultPageSize = _ref.defaultPageSize,
-    defaultPageSize = _ref$defaultPageSize === void 0 ? 12 : _ref$defaultPageSize,
-    _ref$bgColor = _ref.bgColor,
-    bgColor = _ref$bgColor === void 0 ? "#0d6efd" : _ref$bgColor,
-    _ref$txtColor = _ref.txtColor,
-    txtColor = _ref$txtColor === void 0 ? "#fff" : _ref$txtColor,
-    _ref$borderColor = _ref.borderColor,
-    borderColor = _ref$borderColor === void 0 ? "#ddd" : _ref$borderColor;
+var CustomCell = function CustomCell(_ref) {
+  var children = _ref.children,
+    _ref$tdProps = _ref.tdProps,
+    tdProps = _ref$tdProps === void 0 ? {} : _ref$tdProps,
+    column = _ref.column;
+  var dynamicStyle = column !== null && column !== void 0 && column.customStyle ? column.customStyle(children) : {
+    textAlign: (column === null || column === void 0 ? void 0 : column.textAlign) || "center"
+  };
+  return /*#__PURE__*/(0, _jsxRuntime.jsx)("td", _objectSpread(_objectSpread({}, tdProps), {}, {
+    style: _objectSpread(_objectSpread({}, dynamicStyle), tdProps.style),
+    children: children
+  }));
+};
+var CutomInput = function CutomInput(_ref2) {
+  var data = _ref2.data,
+    columns = _ref2.columns,
+    _ref2$groupedColumns = _ref2.groupedColumns,
+    groupedColumns = _ref2$groupedColumns === void 0 ? [] : _ref2$groupedColumns,
+    _ref2$gridViewEnabled = _ref2.gridViewEnabled,
+    gridViewEnabled = _ref2$gridViewEnabled === void 0 ? true : _ref2$gridViewEnabled,
+    _ref2$entriesEnabled = _ref2.entriesEnabled,
+    entriesEnabled = _ref2$entriesEnabled === void 0 ? true : _ref2$entriesEnabled,
+    _ref2$paginationEnabl = _ref2.paginationEnabled,
+    paginationEnabled = _ref2$paginationEnabl === void 0 ? true : _ref2$paginationEnabl,
+    _ref2$currentPage = _ref2.currentPage,
+    currentPage = _ref2$currentPage === void 0 ? 1 : _ref2$currentPage,
+    setCurrentPage = _ref2.setCurrentPage,
+    fetchPage = _ref2.fetchPage,
+    _ref2$pageSize = _ref2.pageSize,
+    pageSize = _ref2$pageSize === void 0 ? 12 : _ref2$pageSize,
+    setPageSize = _ref2.setPageSize,
+    totalRecords = _ref2.totalRecords,
+    _ref2$entriesOptions = _ref2.entriesOptions,
+    entriesOptions = _ref2$entriesOptions === void 0 ? [12, 24, 48, 108] : _ref2$entriesOptions,
+    _ref2$defaultPageSize = _ref2.defaultPageSize,
+    defaultPageSize = _ref2$defaultPageSize === void 0 ? 12 : _ref2$defaultPageSize,
+    _ref2$bgColor = _ref2.bgColor,
+    bgColor = _ref2$bgColor === void 0 ? "#0d6efd" : _ref2$bgColor,
+    _ref2$txtColor = _ref2.txtColor,
+    txtColor = _ref2$txtColor === void 0 ? "#fff" : _ref2$txtColor,
+    _ref2$borderColor = _ref2.borderColor,
+    borderColor = _ref2$borderColor === void 0 ? "#ddd" : _ref2$borderColor;
   (0, _react.useEffect)(function () {
     // Set theme colors based on props
     setRootThemeColors(bgColor, txtColor, borderColor);
@@ -574,7 +587,7 @@ var TableCustom = function TableCustom(_ref) {
                   },
                   className: "bgColor txtColor",
                   children: /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
-                    className: "d-flex justify-content-between align-items-center ",
+                    className: "d-flex justify-content-between align-items-center",
                     children: [column.sortable ? /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
                       className: "d-flex align-items-center",
                       children: [/*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
@@ -596,15 +609,13 @@ var TableCustom = function TableCustom(_ref) {
                             return config.key === column.key;
                           })) === null || _sortConfig$find === void 0 ? void 0 : _sortConfig$find.direction) === "asc" ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                             children: "\u25B2"
-                          }) // Unicode for ▲ (up arrow for ascending sort)
-                          : ((_sortConfig$find2 = sortConfig.find(function (config) {
+                          }) : ((_sortConfig$find2 = sortConfig.find(function (config) {
                             return config.key === column.key;
                           })) === null || _sortConfig$find2 === void 0 ? void 0 : _sortConfig$find2.direction) === "desc" ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                             children: "\u25BC"
-                          }) // Unicode for ▼ (down arrow for descending sort)
-                          : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                          }) : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                             children: "\u25B3\u25BD"
-                          }) // Unicode for △ and ▽ (neutral sort icons)
+                          })
                         })
                       }), sortConfig.find(function (config) {
                         return config.key === column.key;
@@ -638,10 +649,9 @@ var TableCustom = function TableCustom(_ref) {
                       children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                         children: selectedSearchColumns.includes(column.key) ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                           children: "\u2715"
-                        }) // Cross icon
-                        : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+                        }) : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                           children: "\uD83D\uDD0D"
-                        }) // Search icon
+                        })
                       })
                     }) : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {})]
                   })
@@ -663,11 +673,14 @@ var TableCustom = function TableCustom(_ref) {
               return /*#__PURE__*/(0, _jsxRuntime.jsx)("tr", {
                 className: "text-center",
                 children: columns.map(function (column, colIndex) {
-                  return /*#__PURE__*/(0, _jsxRuntime.jsx)("td", {
-                    style: {
-                      textAlign: column.textAlign || "left"
+                  return /*#__PURE__*/(0, _jsxRuntime.jsxs)(CustomCell, {
+                    tdProps: {
+                      style: {
+                        textAlign: column.textAlign || "left"
+                      }
                     },
-                    children: row[column.key]
+                    column: column,
+                    children: [column.customRenderer ? column.customRenderer(row) : row[column.key], " "]
                   }, colIndex);
                 })
               }, rowIndex);
@@ -692,11 +705,13 @@ var TableCustom = function TableCustom(_ref) {
                   }, groupColIndex);
                 })
               }), columns.map(function (column, colIndex) {
-                return !groupedColumns.includes(column.key) && /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
+                if (groupedColumns.includes(column.key)) return null;
+                return /*#__PURE__*/(0, _jsxRuntime.jsxs)("div", {
                   className: "card-text align-items-center",
                   children: [/*#__PURE__*/(0, _jsxRuntime.jsxs)("strong", {
                     children: [column.label, ":"]
-                  }), " ", row[column.key]]
+                  }), " ", column.customRenderer ? column.customRenderer(row) // Render custom content if customRenderer exists
+                  : row[column.key], " ", "// Render default data if no customRenderer"]
                 }, colIndex);
               })]
             })
@@ -739,4 +754,4 @@ var TableCustom = function TableCustom(_ref) {
     })]
   });
 };
-var _default = exports["default"] = TableCustom;
+var _default = exports["default"] = CutomInput;

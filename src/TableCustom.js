@@ -9,7 +9,19 @@ export function setRootThemeColors(bgColor, txtColor, borderColor) {
   document.documentElement.style.setProperty("--border-color", borderColor);
 }
 
-const TableCustom = ({
+const CustomCell = ({ children, tdProps = {}, column }) => {
+  const dynamicStyle = column?.customStyle
+    ? column.customStyle(children)
+    : { textAlign: column?.textAlign || "center" };
+
+  return (
+    <td {...tdProps} style={{ ...dynamicStyle, ...tdProps.style }}>
+      {children}
+    </td>
+  );
+};
+
+const CutomInput = ({
   data,
   columns,
   groupedColumns = [],
@@ -578,12 +590,10 @@ const TableCustom = ({
                     style={{ textAlign: column.textAlign || "left" }}
                     className="bgColor txtColor"
                   >
-                    <div className="d-flex justify-content-between align-items-center ">
+                    <div className="d-flex justify-content-between align-items-center">
                       {/* Sort Icon */}
-
                       {column.sortable ? (
                         <div className="d-flex align-items-center">
-                          {/* Sort Toggle Button */}
                           <span
                             className={`font-10 ${
                               sortConfig.find(
@@ -612,18 +622,17 @@ const TableCustom = ({
                               {sortConfig.find(
                                 (config) => config.key === column.key
                               )?.direction === "asc" ? (
-                                <span>&#9650;</span> // Unicode for ▲ (up arrow for ascending sort)
+                                <span>&#9650;</span>
                               ) : sortConfig.find(
                                   (config) => config.key === column.key
                                 )?.direction === "desc" ? (
-                                <span>&#9660;</span> // Unicode for ▼ (down arrow for descending sort)
+                                <span>&#9660;</span>
                               ) : (
-                                <span>&#9651;&#9661;</span> // Unicode for △ and ▽ (neutral sort icons)
+                                <span>&#9651;&#9661;</span>
                               )}
                             </span>
                           </span>
 
-                          {/* Conditionally Render Clear Sort Button */}
                           {sortConfig.find(
                             (config) => config.key === column.key
                           ) && (
@@ -648,7 +657,6 @@ const TableCustom = ({
                       )}
 
                       {/* Column Label */}
-
                       <span className="px-2">{column.label}</span>
 
                       {/* Column-specific Search Icon */}
@@ -671,9 +679,9 @@ const TableCustom = ({
                         >
                           <span>
                             {selectedSearchColumns.includes(column.key) ? (
-                              <span>&#10005;</span> // Cross icon
+                              <span>&#10005;</span>
                             ) : (
-                              <span>&#128269;</span> // Search icon
+                              <span>&#128269;</span>
                             )}
                           </span>
                         </span>
@@ -702,18 +710,25 @@ const TableCustom = ({
               {data.map((row, rowIndex) => (
                 <tr key={rowIndex} className="text-center">
                   {columns.map((column, colIndex) => (
-                    <td
+                    <CustomCell
                       key={colIndex}
-                      style={{ textAlign: column.textAlign || "left" }}
+                      tdProps={{
+                        style: { textAlign: column.textAlign || "left" },
+                      }}
+                      column={column}
                     >
-                      {row[column.key]}
-                    </td>
+                      {/* Check for customRenderer and render accordingly */}
+                      {column.customRenderer
+                        ? column.customRenderer(row)
+                        : row[column.key]}{" "}
+                    </CustomCell>
                   ))}
                 </tr>
               ))}
             </tbody>
           </table>
         </div>
+
         {/* Card View */}
         <div className={`cardView ${!gridView ? "dHide" : ""}`}>
           {data.map((row, rowIndex) => (
@@ -735,17 +750,22 @@ const TableCustom = ({
                 )}
 
                 {/* Render non-grouped columns */}
-                {columns.map(
-                  (column, colIndex) =>
-                    !groupedColumns.includes(column.key) && (
-                      <div
-                        key={colIndex}
-                        className="card-text align-items-center"
-                      >
-                        <strong>{column.label}:</strong> {row[column.key]}
-                      </div>
-                    )
-                )}
+                {columns.map((column, colIndex) => {
+                  if (groupedColumns.includes(column.key)) return null;
+
+                  return (
+                    <div
+                      key={colIndex}
+                      className="card-text align-items-center"
+                    >
+                      <strong>{column.label}:</strong>{" "}
+                      {column.customRenderer
+                        ? column.customRenderer(row) // Render custom content if customRenderer exists
+                        : row[column.key]}{" "}
+                      // Render default data if no customRenderer
+                    </div>
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -816,4 +836,4 @@ const TableCustom = ({
   );
 };
 
-export default TableCustom;
+export default CutomInput;

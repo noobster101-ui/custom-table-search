@@ -1,6 +1,6 @@
 {
   "name": "custom-table-search",
-  "version": "1.1.4",
+  "version": "1.1.5",
   "homepage": "https://custom-table-sample.vercel.app/",
   "description": "A customizable, dynamic table component with advanced search, sorting, and pagination for React.",
   "main": "dist/TableCustom.js",
@@ -48,5 +48,8 @@
   },
   "bugs": {
     "url": "https://github.com/noobster101-ui/custom-table-search/issues"
+  },
+  "dependencies": {
+    "yalc": "^1.0.0-pre.53"
   }
 }

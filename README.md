@@ -12,6 +12,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 ## Features
 
 - Customizable Columns: Define table columns with labels, sortability, and search options.
+- Use `customRenderer` to display custom content like buttons or styled text in specific columns.
 - Advanced Search and Filtering: Apply multiple conditions with SQL-like connectors (AND, OR) for complex queries.
 - Sorting: Sort data by clicking on column headers.
 - Pagination: Control page size and navigate through data records.
@@ -29,7 +30,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 ### This example uses local static data and showcases pagination, sorting, and action buttons.
 
     import React, { useState, useEffect } from "react";
-    import TableCustom from "custom-table-search";
+    import CutomInput from "custom-table-search";
     import "bootstrap/dist/css/bootstrap.min.css";
 
     const sampleData = [
@@ -39,67 +40,94 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
     // Add more data as needed
     ];
 
-    const StaticDataPage = () => {
-    const [data, setData] = useState([]);
-    const [currentPage, setCurrentPage] = useState(1);
-    const [pageSize, setPageSize] = useState(5); // Define setPageSize here
-    const [totalRecords, setTotalRecords] = useState(sampleData.length);
-    const customEntriesOptions = [5, 10, 20, 50];
-    const customDefaultPageSize = 10;
+        const StaticDataPage = () => {
+        const [data, setData] = useState([]);
+        const [currentPage, setCurrentPage] = useState(1);
+        const [pageSize, setPageSize] = useState(5); // Define setPageSize here
+        const [totalRecords, setTotalRecords] = useState(sampleData.length);
+        const customEntriesOptions = [5, 10, 20, 50];
+        const customDefaultPageSize = 10;
 
-    const columns = [
-        { key: "id", label: "ID", sortable: true },
-        { key: "name", label: "Name", sortable: true, searchable: true },
-        { key: "email", label: "Email", sortable: true, searchable: true },
-        { key: "status", label: "Status", sortable: true, searchable: true },
-    ];
+        const columns = [
+            { key: "id", label: "ID", sortable: true },
+            { key: "name", label: "Name", sortable: true, searchable: true },
+            { key: "email", label: "Email", sortable: true, searchable: true },
+            {
+              key: "status",
+              label: "Status",
+              textAlign: "center",
+              customRenderer: (row) => (
+                <span
+                    style={{
+                        color: row.status === "Active" ? "green" : "red",
+                    }}
+                >
+                    {row.status}
+                </span>
+            ),
+            },
+            {
+              key: "actions",
+              label: "Actions",
+              textAlign: "center",
+              customRenderer: (row) => (
+                <button
+                    className="btn btn-primary"
+                    onClick={() => alert(`Action for ${row.name}`)}
+                >
+                    Action
+                </button>
+              ),
+            },
+        ];
 
-    // Pagination function
-    const fetchPage = (page, size) => {
-        setCurrentPage(page);
-        setPageSize(size);
-        const startIdx = (page - 1) * size;
-        setData(sampleData.slice(startIdx, startIdx + size));
-    };
 
-    useEffect(() => {
-        fetchPage(currentPage, pageSize);
-    }, [currentPage, pageSize]);
+        // Pagination function
+        const fetchPage = (page, size) => {
+            setCurrentPage(page);
+            setPageSize(size);
+            const startIdx = (page - 1) * size;
+            setData(sampleData.slice(startIdx, startIdx + size));
+        };
 
-    return (
-            <div className="container mt-5">
-                <h2>Static Data Table</h2>
-                <TableCustom
-                    data={data}
-                    columns={columns}
-                    gridViewEnabled={true}
-                    entriesEnabled={true}
-                    paginationEnabled={true}
-                    searchEnabled={true}
-                    currentPage={currentPage}
-                    setCurrentPage={setCurrentPage}
-                    fetchPage={fetchPage}
-                    pageSize={pageSize}
-                    setPageSize={setPageSize} // Pass setPageSize here
-                    totalRecords={totalRecords}
-                    entriesOptions={customEntriesOptions}
-                    defaultPageSize={customDefaultPageSize}
-                    bgColor="#111"
-                    txtColor="#fff"
-                    borderColor="#ddd"
-                />
-            </div>
-        );
-    };
+        useEffect(() => {
+            fetchPage(currentPage, pageSize);
+        }, [currentPage, pageSize]);
 
-    export default StaticDataPage;
+        return (
+                <div className="container mt-5">
+                    <h2>Static Data Table</h2>
+                    <CutomInput
+                        data={data}
+                        columns={columns}
+                        gridViewEnabled={true}
+                        entriesEnabled={true}
+                        paginationEnabled={true}
+                        searchEnabled={true}
+                        currentPage={currentPage}
+                        setCurrentPage={setCurrentPage}
+                        fetchPage={fetchPage}
+                        pageSize={pageSize}
+                        setPageSize={setPageSize} // Pass setPageSize here
+                        totalRecords={totalRecords}
+                        entriesOptions={customEntriesOptions}
+                        defaultPageSize={customDefaultPageSize}
+                        bgColor="#111"
+                        txtColor="#fff"
+                        borderColor="#ddd"
+                    />
+                </div>
+            );
+        };
+
+        export default StaticDataPage;
 
 ## Example 2: API Data
 
 ### This example uses local static data and showcases pagination, sorting, and action buttons.
 
     import React, { useState, useEffect } from "react";
-    import TableCustom from "custom-table-search";
+    import CutomInput from "custom-table-search";
     import "bootstrap/dist/css/bootstrap.min.css";
 
     const sampleData = [
@@ -141,7 +169,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
     return (
             <div className="container mt-5">
                 <h2>API Data Table</h2>
-                <TableCustom
+                <CutomInput
                     data={data}
                     columns={columns}
                     paginationEnabled={true}
