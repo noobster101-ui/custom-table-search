@@ -21,7 +21,7 @@ const CustomCell = ({ children, tdProps = {}, column }) => {
   );
 };
 
-const CutomInput = ({
+const TableCustom = ({
   data,
   columns,
   groupedColumns = [],
@@ -758,11 +758,10 @@ const CutomInput = ({
                       key={colIndex}
                       className="card-text align-items-center"
                     >
-                      <strong>{column.label}:</strong>{" "}
+                      <strong>{column.label}:</strong>
                       {column.customRenderer
-                        ? column.customRenderer(row) // Render custom content if customRenderer exists
-                        : row[column.key]}{" "}
-                      // Render default data if no customRenderer
+                        ? column.customRenderer(row)
+                        : row[column.key]}
                     </div>
                   );
                 })}
@@ -836,4 +835,4 @@ const CutomInput = ({
   );
 };
 
-export default CutomInput;
+export default TableCustom;

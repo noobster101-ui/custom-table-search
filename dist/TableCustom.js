@@ -44,7 +44,7 @@ var CustomCell = function CustomCell(_ref) {
     children: children
   }));
 };
-var CutomInput = function CutomInput(_ref2) {
+var TableCustom = function TableCustom(_ref2) {
   var data = _ref2.data,
     columns = _ref2.columns,
     _ref2$groupedColumns = _ref2.groupedColumns,
@@ -710,8 +710,7 @@ var CutomInput = function CutomInput(_ref2) {
                   className: "card-text align-items-center",
                   children: [/*#__PURE__*/(0, _jsxRuntime.jsxs)("strong", {
                     children: [column.label, ":"]
-                  }), " ", column.customRenderer ? column.customRenderer(row) // Render custom content if customRenderer exists
-                  : row[column.key], " ", "// Render default data if no customRenderer"]
+                  }), column.customRenderer ? column.customRenderer(row) : row[column.key]]
                 }, colIndex);
               })]
             })
@@ -754,4 +753,4 @@ var CutomInput = function CutomInput(_ref2) {
     })]
   });
 };
-var _default = exports["default"] = CutomInput;
+var _default = exports["default"] = TableCustom;

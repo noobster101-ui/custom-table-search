@@ -30,7 +30,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 ### This example uses local static data and showcases pagination, sorting, and action buttons.
 
     import React, { useState, useEffect } from "react";
-    import CutomInput from "custom-table-search";
+    import TableCustom from "custom-table-search";
     import "bootstrap/dist/css/bootstrap.min.css";
 
     const sampleData = [
@@ -97,7 +97,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
         return (
                 <div className="container mt-5">
                     <h2>Static Data Table</h2>
-                    <CutomInput
+                    <TableCustom
                         data={data}
                         columns={columns}
                         gridViewEnabled={true}
@@ -127,7 +127,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 ### This example uses local static data and showcases pagination, sorting, and action buttons.
 
     import React, { useState, useEffect } from "react";
-    import CutomInput from "custom-table-search";
+    import TableCustom from "custom-table-search";
     import "bootstrap/dist/css/bootstrap.min.css";
 
     const sampleData = [
@@ -169,7 +169,7 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
     return (
             <div className="container mt-5">
                 <h2>API Data Table</h2>
-                <CutomInput
+                <TableCustom
                     data={data}
                     columns={columns}
                     paginationEnabled={true}
