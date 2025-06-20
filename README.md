@@ -126,8 +126,9 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
 
 ### This example uses local static data and showcases pagination, sorting, and action buttons.
 
-    import React, { useState, useEffect } from "react";
+    import React, { useRef, useState, useEffect } from "react";
     import TableCustom from "custom-table-search";
+
     import "bootstrap/dist/css/bootstrap.min.css";
 
     const sampleData = [
@@ -137,7 +138,8 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
     // Add more data as needed
     ];
 
-    const ApiDataPage = () => {
+    const ApiDataExample = () => {
+    const tableRef = useRef();
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [pageSize, setPageSize] = useState(12);
@@ -163,13 +165,16 @@ Grid and Table Views: Toggle between grid and table views for versatile data dis
     };
 
     useEffect(() => {
-        fetchPage(currentPage, pageSize);
-    }, [currentPage, pageSize]);
+        const criteria = tableRef.current?.getSearchCriteria?.();
+        const sort = tableRef.current?.getSortConfig?.();
+        fetchPage(currentPage, pageSize, criteria, sort);
+    }, []);
 
     return (
             <div className="container mt-5">
                 <h2>API Data Table</h2>
                 <TableCustom
+                    ref={tableRef}
                     data={data}
                     columns={columns}
                     paginationEnabled={true}

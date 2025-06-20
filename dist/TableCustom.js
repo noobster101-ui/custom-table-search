@@ -44,7 +44,7 @@ var CustomCell = function CustomCell(_ref) {
     children: children
   }));
 };
-var TableCustom = function TableCustom(_ref2) {
+var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
   var data = _ref2.data,
     columns = _ref2.columns,
     _ref2$groupedColumns = _ref2.groupedColumns,
@@ -101,7 +101,41 @@ var TableCustom = function TableCustom(_ref2) {
     _useState12 = _slicedToArray(_useState11, 2),
     isConditionRemoved = _useState12[0],
     setIsConditionRemoved = _useState12[1];
-  var searchCriteria = null;
+  var searchCriteria = _getSearchCriteria();
+  var searchValuesRef = useRef(searchValues);
+  var sqlOptionsRef = useRef(sqlOptions);
+  var selectedSearchColumnsRef = useRef(selectedSearchColumns);
+  setSearchValues(function (prev) {
+    var updated = _objectSpread(_objectSpread({}, prev), yourChanges);
+    searchValuesRef.current = updated;
+    return updated;
+  });
+  setSqlOptions(function (prev) {
+    var updated = _objectSpread(_objectSpread({}, prev), yourChanges);
+    sqlOptionsRef.current = updated;
+    return updated;
+  });
+  setSelectedSearchColumns(function (prev) {
+    var updated = _toConsumableArray(yourUpdatedArray);
+    selectedSearchColumnsRef.current = updated;
+    return updated;
+  });
+  (0, _react.useImperativeHandle)(ref, function () {
+    return {
+      getSearchValues: function getSearchValues() {
+        return searchValues;
+      },
+      getSortConfig: function getSortConfig() {
+        return sortConfig;
+      },
+      getSelectedSearchColumns: function getSelectedSearchColumns() {
+        return selectedSearchColumns;
+      },
+      getSearchCriteria: function getSearchCriteria() {
+        return _getSearchCriteria();
+      }
+    };
+  });
   (0, _react.useEffect)(function () {
     if (isConditionRemoved) {
       handleSearchAndSortSubmit();
@@ -119,7 +153,7 @@ var TableCustom = function TableCustom(_ref2) {
     var newSize = Number(e.target.value);
     setPageSize(newSize);
     setCurrentPage(1); // Reset to page 1
-    var searchCriteria = getSearchCriteria(); // Customize search criteria if needed
+    searchCriteria = _getSearchCriteria();
     fetchPage(1, newSize, searchCriteria, sortConfig);
   };
 
@@ -162,23 +196,65 @@ var TableCustom = function TableCustom(_ref2) {
   };
 
   // Remove a specific condition for a column
+  // const handleRemoveCondition = (key, index) => {
+  //   setSearchValues((prevValues) => {
+  //     const updatedValues = { ...prevValues };
+  //     updatedValues[key] = updatedValues[key].filter((_, i) => i !== index);
+
+  //     if (updatedValues[key].length === 0) {
+  //       delete updatedValues[key];
+  //       setSelectedSearchColumns((prev) => prev.filter((col) => col !== key));
+  //     }
+
+  //     return updatedValues;
+  //   });
+
+  //   setIsConditionRemoved(true);
+  // };
   var handleRemoveCondition = function handleRemoveCondition(key, index) {
+    var updatedSearchValues;
+    var updatedSearchColumns;
     setSearchValues(function (prevValues) {
-      var updatedValues = _objectSpread({}, prevValues);
-      updatedValues[key] = updatedValues[key].filter(function (_, i) {
+      var updated = _objectSpread({}, prevValues);
+      if (!updated[key]) return updated;
+      updated[key] = updated[key].filter(function (_, i) {
         return i !== index;
       });
-      if (updatedValues[key].length === 0) {
-        delete updatedValues[key];
-        setSelectedSearchColumns(function (prev) {
-          return prev.filter(function (col) {
-            return col !== key;
-          });
+      if (updated[key].length === 0) {
+        delete updated[key];
+        updatedSearchColumns = selectedSearchColumns.filter(function (col) {
+          return col !== key;
         });
+        setSelectedSearchColumns(updatedSearchColumns);
+        selectedSearchColumnsRef.current = updatedSearchColumns;
+      } else {
+        updatedSearchColumns = selectedSearchColumns;
       }
-      return updatedValues;
+      updatedSearchValues = updated;
+      searchValuesRef.current = updated;
+      return updated;
     });
-    setIsConditionRemoved(true);
+
+    // 🟡 DEFER fetchPage to ensure setState is applied:
+    setTimeout(function () {
+      var keys = Object.keys(updatedSearchValues || {});
+      var updatedCriteria = keys.map(function (key, index) {
+        var conditions = (updatedSearchValues[key] || []).map(function (condition, i, arr) {
+          return _objectSpread({
+            value: condition.value,
+            operator: condition.operator || "LIKE"
+          }, i < arr.length - 1 ? {
+            localConnector: condition.localConnector || "OR"
+          } : {});
+        });
+        return {
+          column: key,
+          conditions: conditions,
+          columnConnector: index < keys.length - 1 ? sqlOptionsRef.current[key] || "AND" : null
+        };
+      });
+      fetchPage(1, pageSize, updatedCriteria, sortConfig);
+    }, 0);
   };
 
   // Handle inter-column SQL operator change (AND/OR) between columns
@@ -187,20 +263,22 @@ var TableCustom = function TableCustom(_ref2) {
       return _objectSpread(_objectSpread({}, prevOptions), {}, _defineProperty({}, key, value));
     });
   };
-  var getSearchCriteria = function getSearchCriteria() {
-    searchCriteria = selectedSearchColumns.map(function (key, index) {
-      var conditions = searchValues[key] ? searchValues[key].map(function (condition, i, arr) {
+  var _getSearchCriteria = function _getSearchCriteria() {
+    var keys = Object.keys(searchValuesRef.current);
+    var searchCriteria = keys.map(function (key, index) {
+      var _searchValuesRef$curr;
+      var conditions = ((_searchValuesRef$curr = searchValuesRef.current[key]) === null || _searchValuesRef$curr === void 0 ? void 0 : _searchValuesRef$curr.map(function (condition, i, arr) {
         return _objectSpread({
           value: condition.value,
           operator: condition.operator || "LIKE"
         }, i < arr.length - 1 && {
           localConnector: condition.localConnector || "OR"
         });
-      }) : [];
+      })) || [];
       return {
         column: key,
         conditions: conditions,
-        columnConnector: index < selectedSearchColumns.length - 1 ? sqlOptions[key] || "AND" : null // Global connector
+        columnConnector: index < keys.length - 1 ? sqlOptionsRef.current[key] || "AND" : null
       };
     });
     return searchCriteria;
@@ -209,7 +287,7 @@ var TableCustom = function TableCustom(_ref2) {
   // Submit search criteria
   var handleSearchAndSortSubmit = function handleSearchAndSortSubmit() {
     setCurrentPage(1);
-    var updatedCriteria = getSearchCriteria();
+    var updatedCriteria = _getSearchCriteria();
     console.log("Updated API Payload:", updatedCriteria);
     fetchPage(1, pageSize, updatedCriteria, sortConfig);
   };
@@ -222,7 +300,12 @@ var TableCustom = function TableCustom(_ref2) {
       delete updatedValues[key];
       return updatedValues;
     });
-    fetchPage(1, pageSize, [], sortConfig);
+
+    // ✅ Defer until state is updated
+    setTimeout(function () {
+      var updatedCriteria = _getSearchCriteria();
+      fetchPage(1, pageSize, updatedCriteria, sortConfig);
+    }, 0);
   };
 
   // Toggle column selection for search and clear if no search columns are active
@@ -231,13 +314,25 @@ var TableCustom = function TableCustom(_ref2) {
       var updatedColumns = prevColumns.includes(key) ? prevColumns.filter(function (col) {
         return col !== key;
       }) : [].concat(_toConsumableArray(prevColumns), [key]);
-      if (updatedColumns.length === 0) {
-        setSearchValues({});
-        setCurrentPage(1);
-        fetchPage(1, pageSize, searchCriteria, sortConfig);
-      } else if (!updatedColumns.includes(key)) {
+      if (!updatedColumns.includes(key)) {
+        // This column was removed from selectedSearchColumns
         clearSearchForColumn(key);
       }
+
+      // if (updatedColumns.length === 0) {
+      //   setSearchValues({});
+      //   setCurrentPage(1);
+      //   // No columns selected → no filters
+      //   fetchPage(1, pageSize, [], sortConfig);
+      // } else if (!updatedColumns.includes(key)) {
+      //   // This column was removed from selectedSearchColumns
+      //   clearSearchForColumn(key);
+      // } else {
+      //   // This column was just added to selectedSearchColumns
+      //   // (Criteria may be empty until user types, but we rebuild anyway)
+      //   searchCriteria = getSearchCriteria();
+      //   fetchPage(1, pageSize, searchCriteria, sortConfig);
+      // }
       return updatedColumns;
     });
   };
@@ -267,25 +362,25 @@ var TableCustom = function TableCustom(_ref2) {
     });
   };
 
-  // Toggle sort direction
+  // Toggle sort direction (clear that column’s sort)
   var handleClearSort = function handleClearSort(key) {
-    setSortConfig(function (prevConfig) {
-      return prevConfig.filter(function (config) {
-        return config.key !== key;
-      });
+    var newSortConfig = sortConfig.filter(function (config) {
+      return config.key !== key;
     });
+    setSortConfig(newSortConfig);
     setCurrentPage(1);
-    fetchPage(1, pageSize, [], sortConfig);
+    searchCriteria = _getSearchCriteria();
+    fetchPage(1, pageSize, searchCriteria, newSortConfig);
   };
 
-  // useEffect to log updated sortConfig or call API
+  // useEffect to log updated sortConfig or call API (optional)
   (0, _react.useEffect)(function () {
     if (process.env.NODE_ENV === "development") {
       console.log("Updated Sort Config:", sortConfig);
     }
   }, [sortConfig]);
 
-  //Create Paggination numberings
+  // Create Pagination numberings
   var generatePaginationItems = function generatePaginationItems() {
     var pages = [];
     var totalPages = Math.ceil(totalRecords / pageSize);
@@ -295,7 +390,7 @@ var TableCustom = function TableCustom(_ref2) {
           active: i === currentPage,
           onClick: function onClick() {
             setCurrentPage(i);
-            searchCriteria = getSearchCriteria();
+            searchCriteria = _getSearchCriteria();
             fetchPage(i, pageSize, searchCriteria, sortConfig);
           },
           children: i
@@ -305,11 +400,12 @@ var TableCustom = function TableCustom(_ref2) {
         _loop(i);
       }
     } else {
+      // Always show “1”
       pages.push(/*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Item, {
         active: 1 === currentPage,
         onClick: function onClick() {
           setCurrentPage(1);
-          searchCriteria = getSearchCriteria();
+          searchCriteria = _getSearchCriteria();
           fetchPage(1, pageSize, searchCriteria, sortConfig);
         },
         children: "1"
@@ -326,7 +422,7 @@ var TableCustom = function TableCustom(_ref2) {
           active: _i === currentPage,
           onClick: function onClick() {
             setCurrentPage(_i);
-            searchCriteria = getSearchCriteria();
+            searchCriteria = _getSearchCriteria();
             fetchPage(_i, pageSize, searchCriteria, sortConfig);
           },
           children: _i
@@ -344,7 +440,7 @@ var TableCustom = function TableCustom(_ref2) {
         active: totalPages === currentPage,
         onClick: function onClick() {
           setCurrentPage(totalPages);
-          searchCriteria = getSearchCriteria();
+          searchCriteria = _getSearchCriteria();
           fetchPage(totalPages, pageSize, searchCriteria, sortConfig);
         },
         children: totalPages
@@ -567,10 +663,9 @@ var TableCustom = function TableCustom(_ref2) {
           children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
             children: gridView ? /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
               children: "\u2B1C"
-            }) // Symbol for grid view (⬛)
-            : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
+            }) : /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
               children: "\u2261"
-            }) // Symbol for table view (≡)
+            })
           })
         })]
       }), /*#__PURE__*/(0, _jsxRuntime.jsx)("div", {
@@ -601,8 +696,28 @@ var TableCustom = function TableCustom(_ref2) {
                         },
                         onClick: function onClick(e) {
                           e.stopPropagation();
+                          // 1) Build newSortConfig based on current sortConfig:
+                          var alreadySorted = sortConfig.find(function (c) {
+                            return c.key === column.key;
+                          });
+                          var newSortConfig = alreadySorted ? sortConfig.map(function (c) {
+                            return c.key === column.key ? {
+                              key: column.key,
+                              direction: c.direction === "asc" ? "desc" : "asc"
+                            } : c;
+                          }) : [].concat(_toConsumableArray(sortConfig), [{
+                            key: column.key,
+                            direction: "asc"
+                          }]);
+
+                          // 2) Update state (this toggles sortConfig to newSortConfig internally)
                           handleSortColumnToggle(column.key);
-                          fetchPage(1, pageSize, searchCriteria, sortConfig);
+
+                          // 3) Rebuild current filters:
+                          searchCriteria = _getSearchCriteria();
+
+                          // 4) Fetch page 1 with both new sort and current filters
+                          fetchPage(1, pageSize, searchCriteria, newSortConfig);
                         },
                         children: /*#__PURE__*/(0, _jsxRuntime.jsx)("span", {
                           children: ((_sortConfig$find = sortConfig.find(function (config) {
@@ -628,6 +743,7 @@ var TableCustom = function TableCustom(_ref2) {
                         },
                         onClick: function onClick(e) {
                           e.stopPropagation();
+                          // Clear sort for this one column:
                           handleClearSort(column.key);
                         },
                         children: "\u2715"
@@ -668,7 +784,7 @@ var TableCustom = function TableCustom(_ref2) {
               })
             })]
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)("tbody", {
-            className: " ".concat(gridView ? "dHide" : ""),
+            className: "".concat(gridView ? "dHide" : ""),
             children: data.map(function (row, rowIndex) {
               return /*#__PURE__*/(0, _jsxRuntime.jsx)("tr", {
                 className: "text-center",
@@ -720,31 +836,35 @@ var TableCustom = function TableCustom(_ref2) {
         className: "d-flex justify-content-between align-items-center mt-3 pagination-container bgColor txtColor",
         children: [/*#__PURE__*/(0, _jsxRuntime.jsxs)("span", {
           className: "pagination-info",
-          children: ["Showing ", srno, " to ", Math.min(srno - 1 + pageSize, totalRecords), " of", " ", totalRecords, " entries"]
+          children: ["Showing ", srno, " to ", Math.min(srno - 1 + pageSize, totalRecords), " of ", totalRecords, " entries"]
         }), /*#__PURE__*/(0, _jsxRuntime.jsxs)(_reactBootstrap.Pagination, {
           className: "mb-0",
           children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.First, {
             onClick: function onClick() {
               setCurrentPage(1);
-              fetchPage(1, pageSize, getSearchCriteria(), sortConfig);
+              searchCriteria = _getSearchCriteria();
+              fetchPage(1, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === 1
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Prev, {
             onClick: function onClick() {
               setCurrentPage(currentPage - 1);
-              fetchPage(currentPage - 1, pageSize, getSearchCriteria(), sortConfig);
+              searchCriteria = _getSearchCriteria();
+              fetchPage(currentPage - 1, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === 1
           }), generatePaginationItems(), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Next, {
             onClick: function onClick() {
               setCurrentPage(currentPage + 1);
-              fetchPage(currentPage + 1, pageSize, getSearchCriteria(), sortConfig);
+              searchCriteria = _getSearchCriteria();
+              fetchPage(currentPage + 1, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === totalPages
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Last, {
             onClick: function onClick() {
               setCurrentPage(totalPages);
-              fetchPage(totalPages, pageSize, getSearchCriteria(), sortConfig);
+              searchCriteria = _getSearchCriteria();
+              fetchPage(totalPages, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === totalPages
           })]
@@ -752,5 +872,5 @@ var TableCustom = function TableCustom(_ref2) {
       })]
     })]
   });
-};
+});
 var _default = exports["default"] = TableCustom;

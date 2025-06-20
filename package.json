@@ -1,6 +1,6 @@
 {
   "name": "custom-table-search",
-  "version": "1.2.3",
+  "version": "1.2.5",
   "homepage": "https://custom-table-sample.vercel.app/",
   "description": "A customizable, dynamic table component with advanced search, sorting, and pagination for React.",
   "main": "dist/TableCustom.js",
