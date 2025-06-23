@@ -97,29 +97,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
     _useState10 = _slicedToArray(_useState9, 2),
     sqlOptions = _useState10[0],
     setSqlOptions = _useState10[1];
-  var _useState11 = (0, _react.useState)(false),
-    _useState12 = _slicedToArray(_useState11, 2),
-    isConditionRemoved = _useState12[0],
-    setIsConditionRemoved = _useState12[1];
-  var searchCriteria = _getSearchCriteria();
-  var searchValuesRef = useRef(searchValues);
-  var sqlOptionsRef = useRef(sqlOptions);
-  var selectedSearchColumnsRef = useRef(selectedSearchColumns);
-  setSearchValues(function (prev) {
-    var updated = _objectSpread(_objectSpread({}, prev), yourChanges);
-    searchValuesRef.current = updated;
-    return updated;
-  });
-  setSqlOptions(function (prev) {
-    var updated = _objectSpread(_objectSpread({}, prev), yourChanges);
-    sqlOptionsRef.current = updated;
-    return updated;
-  });
-  setSelectedSearchColumns(function (prev) {
-    var updated = _toConsumableArray(yourUpdatedArray);
-    selectedSearchColumnsRef.current = updated;
-    return updated;
-  });
+  var searchCriteria = null;
   (0, _react.useImperativeHandle)(ref, function () {
     return {
       getSearchValues: function getSearchValues() {
@@ -132,16 +110,10 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
         return selectedSearchColumns;
       },
       getSearchCriteria: function getSearchCriteria() {
-        return _getSearchCriteria();
+        return getSearchCriteriaFromValues(searchValues, sqlOptions);
       }
     };
   });
-  (0, _react.useEffect)(function () {
-    if (isConditionRemoved) {
-      handleSearchAndSortSubmit();
-      setIsConditionRemoved(false);
-    }
-  }, [searchValues, isConditionRemoved]);
   var sqlOperations = ["AND", "OR"];
   var sqlOperations2 = ["LIKE", "EQUAL", "CONTAINS", "STARTWITH", "ENDWITH", "ISNULL", "ISNOTNULL"];
 
@@ -153,7 +125,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
     var newSize = Number(e.target.value);
     setPageSize(newSize);
     setCurrentPage(1); // Reset to page 1
-    searchCriteria = _getSearchCriteria();
+    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
     fetchPage(1, newSize, searchCriteria, sortConfig);
   };
 
@@ -196,65 +168,29 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
   };
 
   // Remove a specific condition for a column
-  // const handleRemoveCondition = (key, index) => {
-  //   setSearchValues((prevValues) => {
-  //     const updatedValues = { ...prevValues };
-  //     updatedValues[key] = updatedValues[key].filter((_, i) => i !== index);
 
-  //     if (updatedValues[key].length === 0) {
-  //       delete updatedValues[key];
-  //       setSelectedSearchColumns((prev) => prev.filter((col) => col !== key));
-  //     }
-
-  //     return updatedValues;
-  //   });
-
-  //   setIsConditionRemoved(true);
-  // };
   var handleRemoveCondition = function handleRemoveCondition(key, index) {
-    var updatedSearchValues;
-    var updatedSearchColumns;
-    setSearchValues(function (prevValues) {
-      var updated = _objectSpread({}, prevValues);
-      if (!updated[key]) return updated;
-      updated[key] = updated[key].filter(function (_, i) {
-        return i !== index;
-      });
-      if (updated[key].length === 0) {
-        delete updated[key];
-        updatedSearchColumns = selectedSearchColumns.filter(function (col) {
-          return col !== key;
-        });
-        setSelectedSearchColumns(updatedSearchColumns);
-        selectedSearchColumnsRef.current = updatedSearchColumns;
-      } else {
-        updatedSearchColumns = selectedSearchColumns;
-      }
-      updatedSearchValues = updated;
-      searchValuesRef.current = updated;
-      return updated;
+    var updatedValues = _objectSpread({}, searchValues);
+    updatedValues[key] = updatedValues[key].filter(function (_, i) {
+      return i !== index;
     });
 
-    // 🟡 DEFER fetchPage to ensure setState is applied:
-    setTimeout(function () {
-      var keys = Object.keys(updatedSearchValues || {});
-      var updatedCriteria = keys.map(function (key, index) {
-        var conditions = (updatedSearchValues[key] || []).map(function (condition, i, arr) {
-          return _objectSpread({
-            value: condition.value,
-            operator: condition.operator || "LIKE"
-          }, i < arr.length - 1 ? {
-            localConnector: condition.localConnector || "OR"
-          } : {});
-        });
-        return {
-          column: key,
-          conditions: conditions,
-          columnConnector: index < keys.length - 1 ? sqlOptionsRef.current[key] || "AND" : null
-        };
+    // Remove column if no conditions left
+    if (updatedValues[key].length === 0) {
+      delete updatedValues[key];
+      var newSelectedSearchColumns = selectedSearchColumns.filter(function (col) {
+        return col !== key;
       });
-      fetchPage(1, pageSize, updatedCriteria, sortConfig);
-    }, 0);
+      setSelectedSearchColumns(newSelectedSearchColumns);
+    }
+
+    // ✅ Set the updated values into state
+    setSearchValues(updatedValues);
+
+    // ✅ Then immediately use the same updatedValues for criteria
+    var updatedCriteria = getSearchCriteriaFromValues(updatedValues, sqlOptions);
+    setCurrentPage(1);
+    fetchPage(1, pageSize, updatedCriteria, sortConfig);
   };
 
   // Handle inter-column SQL operator change (AND/OR) between columns
@@ -263,31 +199,29 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
       return _objectSpread(_objectSpread({}, prevOptions), {}, _defineProperty({}, key, value));
     });
   };
-  var _getSearchCriteria = function _getSearchCriteria() {
-    var keys = Object.keys(searchValuesRef.current);
-    var searchCriteria = keys.map(function (key, index) {
-      var _searchValuesRef$curr;
-      var conditions = ((_searchValuesRef$curr = searchValuesRef.current[key]) === null || _searchValuesRef$curr === void 0 ? void 0 : _searchValuesRef$curr.map(function (condition, i, arr) {
+  var getSearchCriteriaFromValues = function getSearchCriteriaFromValues(searchValuesObj, sqlOptionsObj) {
+    var keys = Object.keys(searchValuesObj);
+    return keys.map(function (key, index) {
+      var conditions = searchValuesObj[key].map(function (condition, i, arr) {
         return _objectSpread({
           value: condition.value,
           operator: condition.operator || "LIKE"
-        }, i < arr.length - 1 && {
+        }, i > 0 && {
           localConnector: condition.localConnector || "OR"
         });
-      })) || [];
+      });
       return {
         column: key,
         conditions: conditions,
-        columnConnector: index < keys.length - 1 ? sqlOptionsRef.current[key] || "AND" : null
+        columnConnector: index < keys.length - 1 ? sqlOptionsObj[key] || "AND" : null
       };
     });
-    return searchCriteria;
   };
 
   // Submit search criteria
   var handleSearchAndSortSubmit = function handleSearchAndSortSubmit() {
     setCurrentPage(1);
-    var updatedCriteria = _getSearchCriteria();
+    var updatedCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
     console.log("Updated API Payload:", updatedCriteria);
     fetchPage(1, pageSize, updatedCriteria, sortConfig);
   };
@@ -300,39 +234,29 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
       delete updatedValues[key];
       return updatedValues;
     });
-
-    // ✅ Defer until state is updated
-    setTimeout(function () {
-      var updatedCriteria = _getSearchCriteria();
-      fetchPage(1, pageSize, updatedCriteria, sortConfig);
-    }, 0);
+    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
+    fetchPage(1, pageSize, searchCriteria, sortConfig);
   };
 
   // Toggle column selection for search and clear if no search columns are active
   var handleSearchColumnToggle = function handleSearchColumnToggle(key) {
     setSelectedSearchColumns(function (prevColumns) {
-      var updatedColumns = prevColumns.includes(key) ? prevColumns.filter(function (col) {
+      var isRemoving = Array.isArray(prevColumns) && prevColumns.includes(key);
+      var updatedColumns = isRemoving ? prevColumns.filter(function (col) {
         return col !== key;
       }) : [].concat(_toConsumableArray(prevColumns), [key]);
-      if (!updatedColumns.includes(key)) {
-        // This column was removed from selectedSearchColumns
-        clearSearchForColumn(key);
+      if (updatedColumns.length === 0) {
+        setSearchValues({});
+        setCurrentPage(1);
+        fetchPage(1, pageSize, [], sortConfig);
+      } else if (isRemoving) {
+        var updatedSearchValues = _objectSpread({}, searchValues);
+        delete updatedSearchValues[key];
+        setSearchValues(updatedSearchValues);
+        var updatedCriteria = getSearchCriteriaFromValues(updatedSearchValues, sqlOptions);
+        setCurrentPage(1);
+        fetchPage(1, pageSize, updatedCriteria, sortConfig);
       }
-
-      // if (updatedColumns.length === 0) {
-      //   setSearchValues({});
-      //   setCurrentPage(1);
-      //   // No columns selected → no filters
-      //   fetchPage(1, pageSize, [], sortConfig);
-      // } else if (!updatedColumns.includes(key)) {
-      //   // This column was removed from selectedSearchColumns
-      //   clearSearchForColumn(key);
-      // } else {
-      //   // This column was just added to selectedSearchColumns
-      //   // (Criteria may be empty until user types, but we rebuild anyway)
-      //   searchCriteria = getSearchCriteria();
-      //   fetchPage(1, pageSize, searchCriteria, sortConfig);
-      // }
       return updatedColumns;
     });
   };
@@ -369,7 +293,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
     });
     setSortConfig(newSortConfig);
     setCurrentPage(1);
-    searchCriteria = _getSearchCriteria();
+    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
     fetchPage(1, pageSize, searchCriteria, newSortConfig);
   };
 
@@ -390,7 +314,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
           active: i === currentPage,
           onClick: function onClick() {
             setCurrentPage(i);
-            searchCriteria = _getSearchCriteria();
+            searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
             fetchPage(i, pageSize, searchCriteria, sortConfig);
           },
           children: i
@@ -405,7 +329,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
         active: 1 === currentPage,
         onClick: function onClick() {
           setCurrentPage(1);
-          searchCriteria = _getSearchCriteria();
+          searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
           fetchPage(1, pageSize, searchCriteria, sortConfig);
         },
         children: "1"
@@ -422,7 +346,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
           active: _i === currentPage,
           onClick: function onClick() {
             setCurrentPage(_i);
-            searchCriteria = _getSearchCriteria();
+            searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
             fetchPage(_i, pageSize, searchCriteria, sortConfig);
           },
           children: _i
@@ -440,7 +364,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
         active: totalPages === currentPage,
         onClick: function onClick() {
           setCurrentPage(totalPages);
-          searchCriteria = _getSearchCriteria();
+          searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
           fetchPage(totalPages, pageSize, searchCriteria, sortConfig);
         },
         children: totalPages
@@ -714,7 +638,7 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
                           handleSortColumnToggle(column.key);
 
                           // 3) Rebuild current filters:
-                          searchCriteria = _getSearchCriteria();
+                          searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
 
                           // 4) Fetch page 1 with both new sort and current filters
                           fetchPage(1, pageSize, searchCriteria, newSortConfig);
@@ -842,28 +766,28 @@ var TableCustom = /*#__PURE__*/(0, _react.forwardRef)(function (_ref2, ref) {
           children: [/*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.First, {
             onClick: function onClick() {
               setCurrentPage(1);
-              searchCriteria = _getSearchCriteria();
+              searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
               fetchPage(1, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === 1
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Prev, {
             onClick: function onClick() {
               setCurrentPage(currentPage - 1);
-              searchCriteria = _getSearchCriteria();
+              searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
               fetchPage(currentPage - 1, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === 1
           }), generatePaginationItems(), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Next, {
             onClick: function onClick() {
               setCurrentPage(currentPage + 1);
-              searchCriteria = _getSearchCriteria();
+              searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
               fetchPage(currentPage + 1, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === totalPages
           }), /*#__PURE__*/(0, _jsxRuntime.jsx)(_reactBootstrap.Pagination.Last, {
             onClick: function onClick() {
               setCurrentPage(totalPages);
-              searchCriteria = _getSearchCriteria();
+              searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
               fetchPage(totalPages, pageSize, searchCriteria, sortConfig);
             },
             disabled: currentPage === totalPages

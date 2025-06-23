@@ -52,22 +52,14 @@ const TableCustom = forwardRef(
     const [sortConfig, setSortConfig] = useState([]); // Array to store sort columns and directions
     const [selectedSearchColumns, setSelectedSearchColumns] = useState([]);
     const [sqlOptions, setSqlOptions] = useState({});
-    const [isConditionRemoved, setIsConditionRemoved] = useState(false);
-    const searchCriteria = getSearchCriteria();
+    var searchCriteria = null;
 
     useImperativeHandle(ref, () => ({
       getSearchValues: () => searchValues,
       getSortConfig: () => sortConfig,
       getSelectedSearchColumns: () => selectedSearchColumns,
-      getSearchCriteria: () => getSearchCriteria(),
+      getSearchCriteria: () => getSearchCriteriaFromValues(searchValues, sqlOptions),
     }));
-
-    useEffect(() => {
-      if (isConditionRemoved) {
-        handleSearchAndSortSubmit();
-        setIsConditionRemoved(false);
-      }
-    }, [searchValues, isConditionRemoved]);
 
     const sqlOperations = ["AND", "OR"];
     const sqlOperations2 = ["LIKE", "EQUAL", "CONTAINS", "STARTWITH", "ENDWITH", "ISNULL", "ISNOTNULL"];
@@ -81,7 +73,7 @@ const TableCustom = forwardRef(
       const newSize = Number(e.target.value);
       setPageSize(newSize);
       setCurrentPage(1); // Reset to page 1
-      searchCriteria = getSearchCriteria();
+      searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
       fetchPage(1, newSize, searchCriteria, sortConfig);
     };
 
@@ -119,20 +111,26 @@ const TableCustom = forwardRef(
     };
 
     // Remove a specific condition for a column
+
     const handleRemoveCondition = (key, index) => {
-      setSearchValues((prevValues) => {
-        const updatedValues = { ...prevValues };
-        updatedValues[key] = updatedValues[key].filter((_, i) => i !== index);
+      const updatedValues = { ...searchValues };
+      updatedValues[key] = updatedValues[key].filter((_, i) => i !== index);
 
-        if (updatedValues[key].length === 0) {
-          delete updatedValues[key];
-          setSelectedSearchColumns((prev) => prev.filter((col) => col !== key));
-        }
+      // Remove column if no conditions left
+      if (updatedValues[key].length === 0) {
+        delete updatedValues[key];
 
-        return updatedValues;
-      });
+        const newSelectedSearchColumns = selectedSearchColumns.filter((col) => col !== key);
+        setSelectedSearchColumns(newSelectedSearchColumns);
+      }
 
-      setIsConditionRemoved(true);
+      // ✅ Set the updated values into state
+      setSearchValues(updatedValues);
+
+      // ✅ Then immediately use the same updatedValues for criteria
+      const updatedCriteria = getSearchCriteriaFromValues(updatedValues, sqlOptions);
+      setCurrentPage(1);
+      fetchPage(1, pageSize, updatedCriteria, sortConfig);
     };
 
     // Handle inter-column SQL operator change (AND/OR) between columns
@@ -143,31 +141,28 @@ const TableCustom = forwardRef(
       }));
     };
 
-    const getSearchCriteria = () => {
-      searchCriteria = selectedSearchColumns.map((key, index) => {
-        const conditions = searchValues[key]
-          ? searchValues[key].map((condition, i, arr) => ({
-              value: condition.value,
-              operator: condition.operator || "LIKE", // Ensuring operator exists
-              ...(i < arr.length - 1 && {
-                localConnector: condition.localConnector || "OR",
-              }), // Only add localConnector if not the last condition
-            }))
-          : [];
+    const getSearchCriteriaFromValues = (searchValuesObj, sqlOptionsObj) => {
+      const keys = Object.keys(searchValuesObj);
+      return keys.map((key, index) => {
+        const conditions = searchValuesObj[key].map((condition, i, arr) => ({
+          value: condition.value,
+          operator: condition.operator || "LIKE",
+          // ...(i < arr.length - 1 && { localConnector: condition.localConnector || "OR" }),
+          ...(i > 0 && { localConnector: condition.localConnector || "OR" }),
+        }));
 
         return {
           column: key,
-          conditions: conditions,
-          columnConnector: index < selectedSearchColumns.length - 1 ? sqlOptions[key] || "AND" : null, // Global connector
+          conditions,
+          columnConnector: index < keys.length - 1 ? sqlOptionsObj[key] || "AND" : null,
         };
       });
-      return searchCriteria;
     };
 
     // Submit search criteria
     const handleSearchAndSortSubmit = () => {
       setCurrentPage(1);
-      const updatedCriteria = getSearchCriteria();
+      const updatedCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
       console.log("Updated API Payload:", updatedCriteria);
 
       fetchPage(1, pageSize, updatedCriteria, sortConfig);
@@ -181,29 +176,30 @@ const TableCustom = forwardRef(
         delete updatedValues[key];
         return updatedValues;
       });
-      searchCriteria = getSearchCriteria();
+      searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
       fetchPage(1, pageSize, searchCriteria, sortConfig);
     };
 
     // Toggle column selection for search and clear if no search columns are active
     const handleSearchColumnToggle = (key) => {
       setSelectedSearchColumns((prevColumns) => {
-        const updatedColumns = prevColumns.includes(key) ? prevColumns.filter((col) => col !== key) : [...prevColumns, key];
+        const isRemoving = Array.isArray(prevColumns) && prevColumns.includes(key);
+        const updatedColumns = isRemoving ? prevColumns.filter((col) => col !== key) : [...prevColumns, key];
 
         if (updatedColumns.length === 0) {
           setSearchValues({});
           setCurrentPage(1);
-          // No columns selected → no filters
           fetchPage(1, pageSize, [], sortConfig);
-        } else if (!updatedColumns.includes(key)) {
-          // This column was removed from selectedSearchColumns
-          clearSearchForColumn(key);
-        } else {
-          // This column was just added to selectedSearchColumns
-          // (Criteria may be empty until user types, but we rebuild anyway)
-          searchCriteria = getSearchCriteria();
-          fetchPage(1, pageSize, searchCriteria, sortConfig);
+        } else if (isRemoving) {
+          const updatedSearchValues = { ...searchValues };
+          delete updatedSearchValues[key];
+          setSearchValues(updatedSearchValues);
+
+          const updatedCriteria = getSearchCriteriaFromValues(updatedSearchValues, sqlOptions);
+          setCurrentPage(1);
+          fetchPage(1, pageSize, updatedCriteria, sortConfig);
         }
+
         return updatedColumns;
       });
     };
@@ -237,7 +233,7 @@ const TableCustom = forwardRef(
       const newSortConfig = sortConfig.filter((config) => config.key !== key);
       setSortConfig(newSortConfig);
       setCurrentPage(1);
-      searchCriteria = getSearchCriteria();
+      searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
       fetchPage(1, pageSize, searchCriteria, newSortConfig);
     };
 
@@ -261,7 +257,7 @@ const TableCustom = forwardRef(
               active={i === currentPage}
               onClick={() => {
                 setCurrentPage(i);
-                searchCriteria = getSearchCriteria();
+                searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
                 fetchPage(i, pageSize, searchCriteria, sortConfig);
               }}
             >
@@ -277,7 +273,7 @@ const TableCustom = forwardRef(
             active={1 === currentPage}
             onClick={() => {
               setCurrentPage(1);
-              searchCriteria = getSearchCriteria();
+              searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
               fetchPage(1, pageSize, searchCriteria, sortConfig);
             }}
           >
@@ -299,7 +295,7 @@ const TableCustom = forwardRef(
               active={i === currentPage}
               onClick={() => {
                 setCurrentPage(i);
-                searchCriteria = getSearchCriteria();
+                searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
                 fetchPage(i, pageSize, searchCriteria, sortConfig);
               }}
             >
@@ -318,7 +314,7 @@ const TableCustom = forwardRef(
             active={totalPages === currentPage}
             onClick={() => {
               setCurrentPage(totalPages);
-              searchCriteria = getSearchCriteria();
+              searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
               fetchPage(totalPages, pageSize, searchCriteria, sortConfig);
             }}
           >
@@ -544,7 +540,7 @@ const TableCustom = forwardRef(
                                 handleSortColumnToggle(column.key);
 
                                 // 3) Rebuild current filters:
-                                searchCriteria = getSearchCriteria();
+                                searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
 
                                 // 4) Fetch page 1 with both new sort and current filters
                                 fetchPage(1, pageSize, searchCriteria, newSortConfig);
@@ -685,7 +681,7 @@ const TableCustom = forwardRef(
                 <Pagination.First
                   onClick={() => {
                     setCurrentPage(1);
-                    searchCriteria = getSearchCriteria();
+                    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
                     fetchPage(1, pageSize, searchCriteria, sortConfig);
                   }}
                   disabled={currentPage === 1}
@@ -693,7 +689,7 @@ const TableCustom = forwardRef(
                 <Pagination.Prev
                   onClick={() => {
                     setCurrentPage(currentPage - 1);
-                    searchCriteria = getSearchCriteria();
+                    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
                     fetchPage(currentPage - 1, pageSize, searchCriteria, sortConfig);
                   }}
                   disabled={currentPage === 1}
@@ -704,7 +700,7 @@ const TableCustom = forwardRef(
                 <Pagination.Next
                   onClick={() => {
                     setCurrentPage(currentPage + 1);
-                    searchCriteria = getSearchCriteria();
+                    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
                     fetchPage(currentPage + 1, pageSize, searchCriteria, sortConfig);
                   }}
                   disabled={currentPage === totalPages}
@@ -712,7 +708,7 @@ const TableCustom = forwardRef(
                 <Pagination.Last
                   onClick={() => {
                     setCurrentPage(totalPages);
-                    searchCriteria = getSearchCriteria();
+                    searchCriteria = getSearchCriteriaFromValues(searchValues, sqlOptions);
                     fetchPage(totalPages, pageSize, searchCriteria, sortConfig);
                   }}
                   disabled={currentPage === totalPages}

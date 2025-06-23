@@ -3,17 +3,11 @@
   margin-bottom: 20px;
 }
 .bgColor {
-  background-color: var(
-    --back-color,
-    #007bff
-  ) !important; /* Default to white if not set */
+  background-color: var(--back-color, #007bff) !important; /* Default to white if not set */
 }
 
 .txtColor {
-  color: var(
-    --txt-color,
-    #fff
-  ) !important; /* Default to dark gray if not set */
+  color: var(--txt-color, #fff) !important; /* Default to dark gray if not set */
 }
 
 /* Toolbar Styling */
@@ -108,6 +102,8 @@
   padding: 8px;
   margin: -1px;
   color: #2a0f0d;
+  white-space: break-spaces;
+  flex-wrap: wrap;
 }
 
 /* Pagination Styling */
